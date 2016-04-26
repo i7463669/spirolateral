@@ -90,14 +90,21 @@ int main (void)
 	{
 		printf("the pattern is open\n");
 		maxCoord = line_calculate(para, maxCoord, pAngleN, pXn, pYn);
+		
 	}
+	printf ("this is X %06f\n", maxCoord.minX);
+	printf ("this is Y %06f\n", maxCoord.minY);
+	printf ("this is X %06f\n", maxCoord.maxX);
+	printf ("this is Y %06f\n", maxCoord.maxY);
 	//float moveDifX = 0-maxCoord.minX;
 	//float moveDifY = 0-maxCoord.minY;
 	int *pX = &para.X;
 	int *pY = &para.Y;
 	maxCoord = transform_scale(maxCoord, pX, pY);
-	
-	
+	printf ("After this is X %06f\n", maxCoord.minX);
+	printf ("this is Y %06f\n", maxCoord.minY);
+	printf ("this is X %06f\n", maxCoord.maxX);
+	printf ("this is Y %06f\n", maxCoord.maxY);
 	return 0;
 }
 
@@ -109,8 +116,27 @@ maxCoord transform_scale(maxCoord maxCoord, int *pX, int *pY)
 	float moveDifX = 0 - maxCoord.minX;
 	float moveDifY = 0 - maxCoord.minY;
 	float matrixT[3][3] = {{1, 0, moveDifX}, {0, 1, moveDifY}, {0,0,1}};
-	float XYvalue[3] = {maxCoord.minX, maxCoord.minY, 1};
-	float transformationXY;
+	float minXYvalue[3] = {maxCoord.minX, maxCoord.minY, 1};
+	float maxXYvalue[3] = {maxCoord.maxX, maxCoord.maxY, 1};
+	float minTransformX = 0;
+	float minTransformY = 0;
+	float maxTransformX = 0;
+	float maxTransformY = 0;
+	for( int i =0; i<3; i++)
+	{
+		minTransformX += (matrixT[0][i])*(minXYvalue[i]);
+		minTransformY += (matrixT[1][i])*(minXYvalue[i]);
+	}
+	for( int j =0; j<3; j++)
+	{
+		maxTransformX += (matrixT[0][j])*(maxXYvalue[j]);
+		maxTransformY += (matrixT[1][j])*(maxXYvalue[j]);
+	}
+	maxCoord.minX = minTransformX;
+	maxCoord.minY = minTransformY;
+	maxCoord.maxX = maxTransformX;
+	maxCoord.maxY = maxTransformY;
+	
 	return maxCoord;
 	
 }
