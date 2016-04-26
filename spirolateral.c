@@ -25,8 +25,10 @@ typedef struct maxCoord
 }maxCoord;
 
 int open_close_pattern( int, int);
-maxCoord line_calculate(struct parameters para, struct maxCoord maxCoord, int *, float *, float *);
-maxCoord boundary_test(float *, float *, struct maxCoord maxCoord);
+maxCoord line_calculate(parameters para, maxCoord maxCoord, int *, float *, float *);
+maxCoord boundary_test(float *, float *,maxCoord maxCoord);
+maxCoord transform_scale(maxCoord mxCoord, int *, int *);
+
 
 int main (void)
 {
@@ -38,7 +40,7 @@ int main (void)
 	para.X = 0;
 	para.Y = 0;
 	
-	maxCoord maxCoord;
+	
 	float Xn = para.X;
 	float Yn = para.Y;
 	
@@ -47,16 +49,18 @@ int main (void)
 	int angleN = para.angle;
 	int *pAngleN = &angleN;
 	
-	maxCoord.maxX = *pXn;
-	maxCoord.minX = *pXn;
-	maxCoord.maxY = *pYn;
-	maxCoord.minY = *pYn;
+	maxCoord maxCoord;
+	maxCoord.maxX = para.X;
+	maxCoord.minX = para.X;
+	maxCoord.maxY = para.Y;
+	maxCoord.minY = para.Y;
 	
-	/*
+	
 	int winPosX = 100;
 	int winPosY = 100;
 	int winWidth = 200;
 	int winHeight = 200;
+	/*
 	if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
 	{
 		// Something went very wrong in the initialisation, all we can do is exit 
@@ -80,21 +84,35 @@ int main (void)
 		for(int i = 1; i<=para.numOfSeg; i++)
 		{
 			maxCoord = line_calculate(para, maxCoord, pAngleN, pXn, pYn); //mac coordinates for closed pattern
-			printf("this is the max X: \t %06f\n", maxCoord.maxX);
-			printf("this is the max Y: \t %06f\n", maxCoord.maxY);
-			printf("this is the min X: \t %06f\n", maxCoord.minX);
-			printf("this is the min Y: \t %06f\n", maxCoord.minY);
 		}
 	}
 	else
 	{
 		printf("the pattern is open\n");
-	
+		maxCoord = line_calculate(para, maxCoord, pAngleN, pXn, pYn);
 	}
-	
+	//float moveDifX = 0-maxCoord.minX;
+	//float moveDifY = 0-maxCoord.minY;
+	int *pX = &para.X;
+	int *pY = &para.Y;
+	maxCoord = transform_scale(maxCoord, pX, pY);
 	
 	
 	return 0;
+}
+
+
+
+
+maxCoord transform_scale(maxCoord maxCoord, int *pX, int *pY)
+{
+	float moveDifX = 0 - maxCoord.minX;
+	float moveDifY = 0 - maxCoord.minY;
+	float matrixT[3][3] = {{1, 0, moveDifX}, {0, 1, moveDifY}, {0,0,1}};
+	float XYvalue[3] = {maxCoord.minX, maxCoord.minY, 1};
+	float transformationXY;
+	return maxCoord;
+	
 }
 
 
@@ -131,7 +149,7 @@ int open_close_pattern(int angle, int numOfSeg)
 	}
 }
 
-maxCoord boundary_test(float *pXn, float *pYn, struct maxCoord maxCoord)
+maxCoord boundary_test(float *pXn, float *pYn, maxCoord maxCoord)
 {
 	if (*pXn>maxCoord.maxX)
 	{
@@ -152,7 +170,7 @@ maxCoord boundary_test(float *pXn, float *pYn, struct maxCoord maxCoord)
 	return maxCoord;
 }
 
-maxCoord line_calculate(struct parameters para, struct maxCoord maxCoord, int *pAngleN, float *pXn, float *pYn)
+maxCoord line_calculate( parameters para, maxCoord maxCoord, int *pAngleN, float *pXn, float *pYn)
 {
 	
 	float Xdif, Ydif;
