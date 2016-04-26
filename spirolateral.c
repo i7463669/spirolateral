@@ -14,7 +14,7 @@ typedef struct parameters
 	int numOfSeg;
 	int angle;
 	int length;
-} parameters;
+}parameters;
 
 typedef struct maxCoord
 {
@@ -25,9 +25,9 @@ typedef struct maxCoord
 }maxCoord;
 
 int open_close_pattern( int, int);
-maxCoord line_calculate(parameters para, maxCoord maxCoord, int *, float *, float *);
-maxCoord boundary_test(float *, float *,maxCoord maxCoord);
-maxCoord transform_scale(maxCoord mxCoord, int *, int *);
+void line_calculate(struct parameters para,struct  maxCoord *  maxC, int *, float *, float *);
+void boundary_test(float *, float *,maxCoord * maxC);
+maxCoord transform_scale(struct maxCoord maxC, int *, int *);
 
 
 int main (void)
@@ -44,23 +44,24 @@ int main (void)
 	float Xn = para.X;
 	float Yn = para.Y;
 	
-	float *pXn = &Xn;
-	float *pYn = &Yn;
+	//float *pXn = &Xn;
+	//float *pYn = &Yn;
 	int angleN = para.angle;
-	int *pAngleN = &angleN;
+	//int *pAngleN = &angleN;
 	
-	maxCoord maxCoord;
-	maxCoord.maxX = para.X;
-	maxCoord.minX = para.X;
-	maxCoord.maxY = para.Y;
-	maxCoord.minY = para.Y;
+	maxCoord maxC;
+	maxC.maxX = para.X;
+	maxC.minX = para.X;
+	maxC.maxY = para.Y;
+	maxC.minY = para.Y;
 	
 	
-	int winPosX = 100;
-	int winPosY = 100;
-	int winWidth = 200;
-	int winHeight = 200;
-	/*
+	
+	int winPosX = 1000;
+	int winPosY = 1000;
+	int winWidth = 1000;
+	int winHeight = 1000;
+/*
 	if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
 	{
 		// Something went very wrong in the initialisation, all we can do is exit 
@@ -69,13 +70,30 @@ int main (void)
 	}
 
 	// Now we have got SDL initialised, we are ready to create a window!
+	int quit =0;
+	SDL_Event e;
 	
-	SDL_Window *window = SDL_CreateWindow("My Pointy Window!!!",  // The first parameter is the window title //
-		winPosX, winPosY,
-		winWidth, winHeight,
-		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	
-	*/
+		SDL_Window *window = SDL_CreateWindow("My Pointy Window!!!",  // The first parameter is the window title //
+			winPosX, winPosY,
+			winWidth, winHeight,
+			SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+			
+		SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
+	while (quit == 0)
+	{
+		SDL_Event incomingEvent;
+		while( SDL_PollEvent( &incomingEvent ) )
+		{
+			if (e.type == SDL_QUIT )
+			{
+				
+				quit = 1;
+				break;
+			}
+		}
+	}
+*/
 	
 	int openCloseResult = open_close_pattern(para.angle, para.numOfSeg);
 	if (openCloseResult == 0)
@@ -83,41 +101,41 @@ int main (void)
 		printf("the pattern is close\n");
 		for(int i = 1; i<=para.numOfSeg; i++)
 		{
-			maxCoord = line_calculate(para, maxCoord, pAngleN, pXn, pYn); //mac coordinates for closed pattern
+			line_calculate(para, &maxC, &angleN, &Xn, &Yn); //max coordinates for closed pattern
 		}
 	}
 	else
 	{
 		printf("the pattern is open\n");
-		maxCoord = line_calculate(para, maxCoord, pAngleN, pXn, pYn);
+		line_calculate(para, &maxC, &angleN, &Xn, &Yn);
 		
 	}
-	printf ("this is X %06f\n", maxCoord.minX);
-	printf ("this is Y %06f\n", maxCoord.minY);
-	printf ("this is X %06f\n", maxCoord.maxX);
-	printf ("this is Y %06f\n", maxCoord.maxY);
+	printf ("this is X %06f\n", maxC.minX);
+	printf ("this is Y %06f\n", maxC.minY);
+	printf ("this is X %06f\n", maxC.maxX);
+	printf ("this is Y %06f\n", maxC.maxY);
 	//float moveDifX = 0-maxCoord.minX;
 	//float moveDifY = 0-maxCoord.minY;
 	int *pX = &para.X;
 	int *pY = &para.Y;
-	maxCoord = transform_scale(maxCoord, pX, pY);
-	printf ("After this is X %06f\n", maxCoord.minX);
-	printf ("this is Y %06f\n", maxCoord.minY);
-	printf ("this is X %06f\n", maxCoord.maxX);
-	printf ("this is Y %06f\n", maxCoord.maxY);
+	maxC = transform_scale(maxC, pX, pY);
+	printf ("After this is X %06f\n", maxC.minX);
+	printf ("this is Y %06f\n", maxC.minY);
+	printf ("this is X %06f\n", maxC.maxX);
+	printf ("this is Y %06f\n", maxC.maxY);
 	return 0;
 }
 
 
 
 
-maxCoord transform_scale(maxCoord maxCoord, int *pX, int *pY)
+struct maxCoord transform_scale(struct maxCoord maxC, int *pX, int *pY)
 {
-	float moveDifX = 0 - maxCoord.minX;
-	float moveDifY = 0 - maxCoord.minY;
+	float moveDifX = 0 - maxC.minX;
+	float moveDifY = 0 - maxC.minY;
 	float matrixT[3][3] = {{1, 0, moveDifX}, {0, 1, moveDifY}, {0,0,1}};
-	float minXYvalue[3] = {maxCoord.minX, maxCoord.minY, 1};
-	float maxXYvalue[3] = {maxCoord.maxX, maxCoord.maxY, 1};
+	float minXYvalue[3] = {maxC.minX, maxC.minY, 1};
+	float maxXYvalue[3] = {maxC.maxX, maxC.maxY, 1};
 	float minTransformX = 0;
 	float minTransformY = 0;
 	float maxTransformX = 0;
@@ -132,12 +150,12 @@ maxCoord transform_scale(maxCoord maxCoord, int *pX, int *pY)
 		maxTransformX += (matrixT[0][j])*(maxXYvalue[j]);
 		maxTransformY += (matrixT[1][j])*(maxXYvalue[j]);
 	}
-	maxCoord.minX = minTransformX;
-	maxCoord.minY = minTransformY;
-	maxCoord.maxX = maxTransformX;
-	maxCoord.maxY = maxTransformY;
+	maxC.minX = minTransformX;
+	maxC.minY = minTransformY;
+	maxC.maxX = maxTransformX;
+	maxC.maxY = maxTransformY;
 	
-	return maxCoord;
+	return maxC;
 	
 }
 
@@ -175,28 +193,28 @@ int open_close_pattern(int angle, int numOfSeg)
 	}
 }
 
-maxCoord boundary_test(float *pXn, float *pYn, maxCoord maxCoord)
+
+void boundary_test(float *pXn, float *pYn, struct maxCoord * maxC)
 {
-	if (*pXn>maxCoord.maxX)
+	if (*pXn>maxC->maxX)
 	{
-		maxCoord.maxX = *pXn;
+		maxC->maxX = *pXn;
 	}
-	if (*pXn<maxCoord.minX)
+	if (*pXn<maxC->minX)
 	{
-		maxCoord.minX = *pXn;
+		maxC->minX = *pXn;
 	}
-		if (*pYn>maxCoord.maxY)
+		if (*pYn>maxC->maxY)
 	{
-		maxCoord.maxY = *pYn;
+		maxC->maxY = *pYn;
 	}
-	if (*pYn<maxCoord.minY)
+	if (*pYn<maxC->minY)
 	{
-		maxCoord.minY = *pYn;
+		maxC->minY = *pYn;
 	}
-	return maxCoord;
 }
 
-maxCoord line_calculate( parameters para, maxCoord maxCoord, int *pAngleN, float *pXn, float *pYn)
+void line_calculate( struct parameters para, struct maxCoord * maxC, int *pAngleN, float *pXn, float *pYn)
 {
 	
 	float Xdif, Ydif;
@@ -210,7 +228,7 @@ maxCoord line_calculate( parameters para, maxCoord maxCoord, int *pAngleN, float
 		Ydif = para.length*(cos(rad*(*pAngleN)));
 		*pYn += Ydif;
 		
-		maxCoord = boundary_test(pXn, pYn, maxCoord);
+		 boundary_test(pXn, pYn, maxC);
 		
 		length *=2;
 		*pAngleN += para.angle;
@@ -219,6 +237,5 @@ maxCoord line_calculate( parameters para, maxCoord maxCoord, int *pAngleN, float
 			*pAngleN -=360;
 		}
 	}
-	return maxCoord;
 }
 
