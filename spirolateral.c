@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <math.h>
-//#include <SDL2/SDL.h>
+#include <SDL2/SDL.h>
 
 
 #define PI 3.14159265
@@ -24,10 +24,17 @@ typedef struct maxCoord
 	float minY;
 }maxCoord;
 
+typedef struct scale_translate
+{
+	float scale;
+	float position;
+}scale_translate;
+
+
 int open_close_pattern( int, int);
 void line_calculate(struct parameters para,struct  maxCoord *  maxC, int *, float *, float *);
 void boundary_test(float *, float *,maxCoord * maxC);
-maxCoord transform_scale(struct maxCoord maxC, int *, int *);
+void transform_scale(struct maxCoord maxC, int *, int *, int);
 
 
 int main (void)
@@ -35,7 +42,7 @@ int main (void)
 	parameters para;
 	para.length = 3;
 	para.numOfSeg = 5;
-	para.angle = 40;
+	para.angle = 50;
 
 	para.X = 0;
 	para.Y = 0;
@@ -43,10 +50,10 @@ int main (void)
 	
 	float Xn = para.X;
 	float Yn = para.Y;
-	
+	int angleN = para.angle;
 	//float *pXn = &Xn;
 	//float *pYn = &Yn;
-	int angleN = para.angle;
+	
 	//int *pAngleN = &angleN;
 	
 	maxCoord maxC;
@@ -57,45 +64,13 @@ int main (void)
 	
 	
 	
-	int winPosX = 1000;
-	int winPosY = 1000;
+	int winPosX = 0;
+	int winPosY = 0;
 	int winWidth = 1000;
 	int winHeight = 1000;
-/*
-	if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
-	{
-		// Something went very wrong in the initialisation, all we can do is exit 
-		perror("Whoops! Something went very wrong, cannot initialise SDL :(");
-		return -1;
-	}
-
-	// Now we have got SDL initialised, we are ready to create a window!
-	int quit =0;
-	SDL_Event e;
-	
-	
-		SDL_Window *window = SDL_CreateWindow("My Pointy Window!!!",  // The first parameter is the window title //
-			winPosX, winPosY,
-			winWidth, winHeight,
-			SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-			
-		SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
-	while (quit == 0)
-	{
-		SDL_Event incomingEvent;
-		while( SDL_PollEvent( &incomingEvent ) )
-		{
-			if (e.type == SDL_QUIT )
-			{
-				
-				quit = 1;
-				break;
-			}
-		}
-	}
-*/
-	
 	int openCloseResult = open_close_pattern(para.angle, para.numOfSeg);
+	
+	
 	if (openCloseResult == 0)
 	{
 		printf("the pattern is close\n");
@@ -103,22 +78,98 @@ int main (void)
 		{
 			line_calculate(para, &maxC, &angleN, &Xn, &Yn); //max coordinates for closed pattern
 		}
+		
 	}
 	else
 	{
 		printf("the pattern is open\n");
 		line_calculate(para, &maxC, &angleN, &Xn, &Yn);
-		
 	}
+	transform_scale(maxC, &para.X, &para.Y, winWidth);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
+	{
+		// Something went very wrong in the initialisation, all we can do is exit 
+		perror("Whoops! Something went very wrong, cannot initialise SDL :(");
+		return -1;
+	}
+
+
+
+	// Now we have got SDL initialised, we are ready to create a window!
+	int quit =0;
+	
+	
+	SDL_Window *window = SDL_CreateWindow("My Pointy Window!!!",  // The first parameter is the window title //
+		winPosX, winPosY,
+		winWidth, winHeight,
+		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+		
+	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
+		
+		
+	while (quit == 0)
+	{
+		SDL_Event incomingEvent;
+		while( SDL_PollEvent( &incomingEvent ) )
+		{
+			switch( incomingEvent.type )
+			{
+			case SDL_QUIT:
+				quit = 1;
+				break;
+			}
+		
+		
+		
+			if (openCloseResult == 0)
+			{
+				printf("the pattern is close\n");
+				for(int i = 1; i<=para.numOfSeg; i++)
+				{
+					line_calculate(para, &maxC, &angleN, &Xn, &Yn); //max coordinates for closed pattern
+				}
+			}
+			else
+			{
+				printf("the pattern is open\n");
+				line_calculate(para, &maxC, &angleN, &Xn, &Yn);
+			
+			}
+			
+			SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+			/* Clear the entire screen to our selected colour */
+			SDL_RenderClear(renderer);
+			SDL_RenderPresent(renderer);
+		
+		}
+	}
+
+	
+	SDL_DestroyWindow( window );
+	SDL_Quit();
+	
+	
+	
+	
+
 	printf ("this is X %06f\n", maxC.minX);
 	printf ("this is Y %06f\n", maxC.minY);
 	printf ("this is X %06f\n", maxC.maxX);
 	printf ("this is Y %06f\n", maxC.maxY);
 	//float moveDifX = 0-maxCoord.minX;
 	//float moveDifY = 0-maxCoord.minY;
-	int *pX = &para.X;
-	int *pY = &para.Y;
-	maxC = transform_scale(maxC, pX, pY);
+	//int *pX = &para.X;
+	//int *pY = &para.Y;
+	transform_scale(maxC, &para.X, &para.Y, winHeight);
 	printf ("After this is X %06f\n", maxC.minX);
 	printf ("this is Y %06f\n", maxC.minY);
 	printf ("this is X %06f\n", maxC.maxX);
@@ -129,7 +180,7 @@ int main (void)
 
 
 
-struct maxCoord transform_scale(struct maxCoord maxC, int *pX, int *pY)
+void transform_scale(struct maxCoord maxC, int *pX, int *pY,int maxResolution)
 {
 	float moveDifX = 0 - maxC.minX;
 	float moveDifY = 0 - maxC.minY;
@@ -140,6 +191,8 @@ struct maxCoord transform_scale(struct maxCoord maxC, int *pX, int *pY)
 	float minTransformY = 0;
 	float maxTransformX = 0;
 	float maxTransformY = 0;
+	float scaleFactor;
+
 	for( int i =0; i<3; i++)
 	{
 		minTransformX += (matrixT[0][i])*(minXYvalue[i]);
@@ -155,8 +208,14 @@ struct maxCoord transform_scale(struct maxCoord maxC, int *pX, int *pY)
 	maxC.maxX = maxTransformX;
 	maxC.maxY = maxTransformY;
 	
-	return maxC;
-	
+	if ((maxC.maxX =! maxResolution) && (maxC.maxX < maxResolution))
+	{
+		scaleFactor = maxResolution/maxC.maxX;
+	}
+	if ((maxC.maxY =! maxResolution) && (maxC.maxX < maxResolution))
+	{
+		
+	}
 }
 
 
