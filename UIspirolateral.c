@@ -94,13 +94,15 @@ int main (void)
 
 	int winPosX = 100;
 	int winPosY = 100;
-	int winWidth = 500;
+	int winWidth = 600;
 	int winHeight = 500;
 
 	RGBcolour c;
 	c.r = 0;
 	c.g = 0;
 	c.b = 0;
+	
+	SDL_Event event;
 	/*
 
 	int openCloseResult = open_close_pattern(para.angle, para.numOfSeg);
@@ -144,11 +146,12 @@ int main (void)
 
 
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
+	
+	
+		SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+		SDL_RenderClear(renderer);
+		SDL_RenderPresent(renderer);
 
-
-	SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-	SDL_RenderClear(renderer);
-	SDL_RenderPresent(renderer);
 	while (quit == 0)
 	{
 
@@ -160,26 +163,49 @@ int main (void)
 			switch( incomingEvent.type )
 			{
 				case SDL_QUIT:
-					{
-						quit = 1;
-						break;
-					}
+				{
+					quit = 1;
+					break;
+				}
 				/*
 				case SDL_MOUSEMOTION:
 					{
 						printf("hi");
 						break;
 					}
+				
 				*/
 				case SDL_MOUSEBUTTONDOWN:
+				{
+					printf("hi\n");
+					if (event.button.button == SDL_BUTTON_LEFT)
 					{
-						SDL_RenderClear(renderer);
-						pen_down(renderer, para.X, para.Y, para.length, c );
 						
-						SDL_RenderPresent(renderer);
-						break;
+							printf("YES");
+							int x = event.button.x;
+							printf("HI\n\t%d", x);
+							if (x<=50)
+							{
+							
+								printf("working\n");
+								SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+								SDL_RenderClear(renderer);
+								SDL_RenderPresent(renderer);
+								
+								SDL_RenderClear(renderer);
+								pen_down(renderer, para.X, para.Y, para.length, c );
+									
+								SDL_RenderPresent(renderer);
+							}
+						
+						
+					
 					}
+					break;
+				}
 			}
+		
+		
 		}
 	}
 

@@ -1,6 +1,6 @@
 # make file for spirolateral
 # spirolateral.o
-OBJECTS = UIspirolateral.o
+OBJECTS = UIspirolateral.c
 PROGNAME = spirolateral
 OUTPUT =-lm -l SDL2 -o
 OPTIONS = -std=c89 -c
