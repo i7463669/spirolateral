@@ -16,6 +16,12 @@ typedef struct parameters
 	int length;
 }parameters;
 
+typedef struct turtle_parameters
+{
+	int xPos;
+	int yPos;
+	int angle;
+}turtle_parameters;
 typedef struct maxCoord
 {
 	float maxX;
@@ -32,8 +38,8 @@ typedef struct scale_translate
 
 
 int open_close_pattern( int, int);
-void line_calculate(struct parameters para,struct  maxCoord *  maxC, int *, float *, float *);
-void boundary_test(float *, float *,maxCoord * maxC);
+void line_calculate(struct parameters para,struct  maxCoord *  maxC, struct turtle_parameters * turtle);
+void max_coordinate_test(int *, int *,maxCoord * maxC);
 void transform_scale(struct maxCoord maxC, int *, int *, int);
 
 
@@ -47,10 +53,16 @@ int main (void)
 	para.X = 0;
 	para.Y = 0;
 	
+	turtle_parameters turtle;
+	turtle.xPos = para.X;
+	turtle.yPos = para.Y;
+	turtle.angle = para.angle; 
 	
-	float Xn = para.X;
-	float Yn = para.Y;
-	int angleN = para.angle;
+	
+	
+	//float Xn = para.X;
+	//float Yn = para.Y;
+	//int angleN = para.angle;
 	//float *pXn = &Xn;
 	//float *pYn = &Yn;
 	
@@ -64,10 +76,14 @@ int main (void)
 	
 	
 	
-	int winPosX = 0;
-	int winPosY = 0;
-	int winWidth = 1000;
-	int winHeight = 1000;
+	int winPosX = 100;
+	int winPosY = 100;
+	int winWidth = 500;
+	int winHeight = 500;
+	
+	
+	
+	
 	int openCloseResult = open_close_pattern(para.angle, para.numOfSeg);
 	
 	
@@ -76,14 +92,14 @@ int main (void)
 		printf("the pattern is close\n");
 		for(int i = 1; i<=para.numOfSeg; i++)
 		{
-			line_calculate(para, &maxC, &angleN, &Xn, &Yn); //max coordinates for closed pattern
+			line_calculate(para, &maxC, &turtle); //max coordinates for closed pattern
 		}
 		
 	}
 	else
 	{
 		printf("the pattern is open\n");
-		line_calculate(para, &maxC, &angleN, &Xn, &Yn);
+		line_calculate(para, &maxC, &turtle);
 	}
 	transform_scale(maxC, &para.X, &para.Y, winWidth);
 	
@@ -108,7 +124,7 @@ int main (void)
 	int quit =0;
 	
 	
-	SDL_Window *window = SDL_CreateWindow("My Pointy Window!!!",  // The first parameter is the window title //
+	SDL_Window *window = SDL_CreateWindow("Spirolateral",  // The first parameter is the window title //
 		winPosX, winPosY,
 		winWidth, winHeight,
 		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
@@ -123,13 +139,27 @@ int main (void)
 		{
 			switch( incomingEvent.type )
 			{
-			case SDL_QUIT:
-				quit = 1;
-				break;
+				case SDL_QUIT:
+					{
+						quit = 1;
+						break;
+					}
+				/*
+				case SDL_MOUSEMOTION:
+					{
+					
+						break;
+					}
+				*/
+				case SDL_MOUSEBUTTONDOWN:
+					{
+						
+						break;
+					}
 			}
 		
 		
-		
+		/*
 			if (openCloseResult == 0)
 			{
 				printf("the pattern is close\n");
@@ -144,13 +174,15 @@ int main (void)
 				line_calculate(para, &maxC, &angleN, &Xn, &Yn);
 			
 			}
-			
+			*/
 			SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-			/* Clear the entire screen to our selected colour */
+			 //Clear the entire screen to our selected colour 
+			 
 			SDL_RenderClear(renderer);
 			SDL_RenderPresent(renderer);
 		
 		}
+		
 	}
 
 	
@@ -253,7 +285,7 @@ int open_close_pattern(int angle, int numOfSeg)
 }
 
 
-void boundary_test(float *pXn, float *pYn, struct maxCoord * maxC)
+void max_coordinate_test(int *pXn, int *pYn, struct maxCoord * maxC)
 {
 	if (*pXn>maxC->maxX)
 	{
@@ -273,7 +305,7 @@ void boundary_test(float *pXn, float *pYn, struct maxCoord * maxC)
 	}
 }
 
-void line_calculate( struct parameters para, struct maxCoord * maxC, int *pAngleN, float *pXn, float *pYn)
+void line_calculate( struct parameters para, struct maxCoord * maxC, struct turtle_parameters * turtle)
 {
 	
 	float Xdif, Ydif;
@@ -282,19 +314,20 @@ void line_calculate( struct parameters para, struct maxCoord * maxC, int *pAngle
 
 	for (int i = 1; i<=para.numOfSeg; i++)
 	{
-		Xdif = para.length*(sin(rad*(*pAngleN)));
-		*pXn += Xdif;
-		Ydif = para.length*(cos(rad*(*pAngleN)));
-		*pYn += Ydif;
+		Xdif = para.length*(sin(rad*(turtle->angle)));
+		turtle->xPos += Xdif;
+		Ydif = para.length*(cos(rad*(turtle->angle)));
+		turtle->yPos += Ydif;
 		
-		 boundary_test(pXn, pYn, maxC);
+		 max_coordinate_test(&turtle->xPos, &turtle->yPos, maxC);
 		
 		length *=2;
-		*pAngleN += para.angle;
-		if (*pAngleN >= 360)
+		
+		if (turtle->angle >= 360)
 		{
-			*pAngleN -=360;
+			turtle->angle -=360;
 		}
+		turtle->angle += para.angle;
 	}
 }
 
