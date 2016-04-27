@@ -177,35 +177,15 @@ int main (void)
 						pen_down(renderer, para.X, para.Y, para.length, c );
 						
 						SDL_RenderPresent(renderer);
-						printf("HI\n");
-
-						
 						break;
-
-
 					}
-
 			}
 		}
-		
-
-
-
-
-
-
 	}
-
-
-
-
-
 
 
 	SDL_DestroyWindow( window );
 	SDL_Quit();
-
-
 	return 0;
 }
 
