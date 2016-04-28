@@ -19,9 +19,10 @@ typedef struct parameters
 
 typedef struct turtle_parameters
 {
-	int xPos;
-	int yPos;
+	int x;
+	int y;
 	int angle;
+	int length;
 }turtle_parameters;
 typedef struct maxCoord
 {
@@ -54,6 +55,8 @@ void transform_scale(struct maxCoord maxC, struct parameters * para, int *, int 
 void bresenham_draw(int, int, int, int);
 
 
+
+void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int, int);
 void pen_down(SDL_Renderer *, int, int, int, RGBcolour c);
 
 
@@ -62,16 +65,17 @@ int main (void)
 {
 	//setting the values for intial parameters of the turtle
 	parameters para;
-	para.length = 500;
+	para.length = 20;
 	para.numOfSeg = 5;
 	para.angle = 50;
-	para.X = 0;
-	para.Y = 10;
+	para.X = 250;
+	para.Y = 400;
 
 	turtle_parameters turtle;
-	turtle.xPos = para.X;
-	turtle.yPos = para.Y;
+	turtle.x = para.X;
+	turtle.y = para.Y;
 	turtle.angle = para.angle;
+	turtle.length = para.length;
 
 
 
@@ -102,7 +106,7 @@ int main (void)
 	c.g = 0;
 	c.b = 0;
 	
-	SDL_Event event;
+	
 	/*
 
 	int openCloseResult = open_close_pattern(para.angle, para.numOfSeg);
@@ -148,14 +152,14 @@ int main (void)
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
 	
 	
-		SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-		SDL_RenderClear(renderer);
-		SDL_RenderPresent(renderer);
-
+	SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+	SDL_RenderClear(renderer);
+	SDL_RenderPresent(renderer);
+	
 	while (quit == 0)
 	{
 
-
+	
 
 		SDL_Event incomingEvent;
 		while( SDL_PollEvent( &incomingEvent ) )
@@ -177,29 +181,53 @@ int main (void)
 				*/
 				case SDL_MOUSEBUTTONDOWN:
 				{
-					printf("hi\n");
-					if (event.button.button == SDL_BUTTON_LEFT)
+					SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+					SDL_RenderClear(renderer);
+					switch (incomingEvent.button.button)
 					{
-						
-							printf("YES");
-							int x = event.button.x;
-							printf("HI\n\t%d", x);
-							if (x<=50)
+					
+					
+					
+						case SDL_BUTTON_LEFT:
+						{
+							printf("LeftClick\n");
+							int x = incomingEvent.button.x;
+							//tests if the mouse position x is greater than 500
+							printf("X position\t%d\n", x);
+							if (x>=500)
 							{
+								int openCloseResult  = open_close_pattern(para.angle, para.numOfSeg);
+								if (openCloseResult == 0)
+								{
+									printf("not closed\n");
+									for (int i = 1; i<= 36; i++)
+									{
+										turtle.length= para.length;
+										for (int j = 1; j<= para.numOfSeg; j++)
+										{
+											turtle_move(renderer, &turtle, para.angle, para.length);
+										}
+										
+									}
+								}
+								else
+								{
+									printf("closed\n");
+								}
 							
-								printf("working\n");
-								SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-								SDL_RenderClear(renderer);
-								SDL_RenderPresent(renderer);
+							
 								
-								SDL_RenderClear(renderer);
 								pen_down(renderer, para.X, para.Y, para.length, c );
 									
 								SDL_RenderPresent(renderer);
+								
 							}
-						
-						
-					
+						break;
+						}
+						default:
+						{
+						printf("not left click\n");
+						}
 					}
 					break;
 				}
@@ -225,4 +253,65 @@ void pen_down(SDL_Renderer *renderer, int x0, int y0, int length, RGBcolour c)
 		SDL_RenderDrawPoint(renderer, i, 10 );
 	}
 
+}
+
+int open_close_pattern(int angle, int numOfSeg)
+{
+	if ((numOfSeg*angle)%180 ==0)
+	{
+		if (numOfSeg%2 ==0)
+		{
+			if ((numOfSeg <=2) || ((angle*numOfSeg)%360 == 0))
+			{
+				return 0;		/* open*/
+			}
+			else
+			{
+				return 1;		/* closed*/
+			}
+		}
+		else
+		{
+			if ((numOfSeg*angle)%360 == 0)
+			{
+				return 0;		/* open*/
+			}
+			else
+			{
+				return 1;		/* closed*/
+			}
+		}
+	}
+	else
+	{
+		return 0;				/* open*/
+	}
+}
+
+void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle, int length)
+{
+	float Xdif, Ydif;
+	float rad = PI/180;
+	float tempX, tempY;
+	
+	tempX = turtle->x;
+	tempY = turtle->y;
+	SDL_SetRenderDrawColor( renderer, 0, 0, 0, 0xFF );
+
+	Xdif = turtle->length*(sin(rad*(turtle->angle)));
+	turtle->x += (int)Xdif;
+	Ydif = turtle->length*(cos(rad*(turtle->angle)));
+	turtle->y += (int)Ydif;
+	
+	SDL_RenderDrawLine(renderer, (int)tempX, (int)tempY, (int)turtle->x, (int)turtle->y);
+	//max_coordinate_test(&turtle->xPos, &turtle->yPos, maxC);
+	
+	length *=2;
+	
+	if (turtle->angle >= 360)
+	{
+		turtle->angle -=360;
+	}
+	turtle->angle += angle;
+	turtle->length += length;
 }
