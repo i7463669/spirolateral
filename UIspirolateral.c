@@ -200,7 +200,7 @@ int main (void)
 								if (openCloseResult == 0)
 								{
 									printf("not closed\n");
-									for (int i = 1; i<= 36; i++)
+									for (int i = 1; i<= 1; i++)
 									{
 										turtle.length= para.length;
 										for (int j = 1; j<= para.numOfSeg; j++)
