@@ -68,9 +68,9 @@ int main (void)
 {
 	//setting the values for intial parameters of the turtle
 	parameters para;
-	para.length = 20;
-	para.numOfSeg = 7;
-	para.angle = 135;
+	para.length = 5;
+	para.numOfSeg = 6;
+	para.angle = 120;
 	para.X = 0;
 	para.Y = 0;
 
@@ -101,7 +101,7 @@ int main (void)
 
 	int winPosX = 100;
 	int winPosY = 100;
-	int winWidth = 600;
+	int winWidth = 500;
 	int winHeight = 500;
 
 	RGBcolour c;
@@ -197,15 +197,15 @@ int main (void)
 							int x = incomingEvent.button.x;
 							//tests if the mouse position x is greater than 500
 							printf("X position\t%d\n", x);
-							if (x>=500)
+							if (x>=100)
 							{
+								int repeat = 30;
 								int openCloseResult  = open_close_pattern(para.angle, para.numOfSeg);
 								if (openCloseResult == 0)
 								{
 									
 									printf("closed\n");
-									
-									for (int k = 1; k<= 20; k++)
+									for (int k = 1; k<= repeat; k++)
 									{
 										turtle.length= para.length;
 										for (int d=1; d <=para.numOfSeg; d++)
@@ -216,7 +216,7 @@ int main (void)
 									} 
 									turtle.angle = para.angle;
 									transform_scale(maxC, &turtle, &para.length, winHeight);
-									for (int i = 1; i<= 36; i++)
+									for (int i = 1; i<= repeat; i++)
 									{
 										turtle.length= para.length;
 										for (int j = 1; j<= para.numOfSeg; j++)
@@ -229,6 +229,27 @@ int main (void)
 								else
 								{
 									printf("open\n");
+								int repeat = 5;
+									for (int k = 1; k<= repeat; k++)
+									{
+										turtle.length= para.length;
+										for (int d=1; d <=para.numOfSeg; d++)
+										{
+											find_max_coordinates(renderer, &turtle, &maxC, para.angle, para.length);
+										}
+										
+									} 
+									turtle.angle = para.angle;
+									transform_scale(maxC, &turtle, &para.length, winHeight);
+									for (int i = 1; i<= repeat; i++)
+									{
+										turtle.length= para.length;
+										for (int j = 1; j<= para.numOfSeg; j++)
+										{
+											turtle_move(renderer, &turtle, para.angle, para.length);
+										}
+										
+									}
 								}
 							
 							
@@ -273,17 +294,19 @@ void pen_down(SDL_Renderer *renderer, int x0, int y0, int length, RGBcolour c)
 
 int open_close_pattern(int angle, int numOfSeg)
 {
+	angle = 180-angle;
+	printf ("%d\n", angle);
 	if ((numOfSeg*angle)%180 ==0)
 	{
 		if (numOfSeg%2 ==0)
 		{
 			if ((numOfSeg <=2) || ((angle*numOfSeg)%360 == 0))
 			{
-				return 0;		/* open*/
+				return 1;		/* open*/
 			}
 			else
 			{
-				return 1;		/* closed*/
+				return 0;		/* closed*/
 			}
 		}
 		else
@@ -383,7 +406,7 @@ void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, m
 void transform_scale(struct max_coordinates maxC, struct turtle_parameters * turtle, float * length, int maxResolution)
 {
 	scaleTranslateValue scaleTran;
-
+	printf("scmaxale %f\n", maxC.maxX);
 	int moveDifX = 0 - (int)maxC.minX;
 	int moveDifY = 0 - (int)maxC.minY;
 	float matrixT[3][3] = {{1, 0, moveDifX}, {0, 1, moveDifY}, {0,0,1}};
@@ -394,7 +417,8 @@ void transform_scale(struct max_coordinates maxC, struct turtle_parameters * tur
 	float maxTransformX = 0;
 	float maxTransformY = 0;
 	float scale = 1;
-
+	printf("tranform %f\n", maxC.maxY);
+	printf("tranform %f\n", maxC.maxX);
 	for( int i =0; i<3; i++)
 	{
 		minTransformX += (matrixT[0][i])*(minXYvalue[i]);
@@ -409,31 +433,25 @@ void transform_scale(struct max_coordinates maxC, struct turtle_parameters * tur
 	maxC.minY = minTransformY;
 	maxC.maxX = maxTransformX;
 	maxC.maxY = maxTransformY;
-	
+	printf("tranform %f\n", maxTransformX);
+	printf("tranform %f\n", maxC.maxX);
 	scaleTran.positionX = moveDifX;
 	scaleTran.positionY = moveDifY;
 
-	if ((maxC.maxX =! maxResolution))
+	printf("scmaxale %f\n", maxC.maxX);
+	scale *= maxResolution/maxC.maxX;
+	if (maxC.maxY>maxResolution)
 	{
-		scale *= (maxResolution/maxC.maxX);
+		scale *= maxResolution/maxC.maxY;
 	}
-	if ((maxC.maxY =! maxResolution))
-	{
-		scale *= (maxResolution/maxC.maxY);
-	}
+	printf("scale %f\n", scale);
+
 	
-	//scale *= (maxResolution/maxC.maxX);
-	//scale *= (maxResolution/maxC.maxY);
-	
+	moveDifX *= scale;
+	moveDifY *= scale;
 	(*length)*= scale;
 	
 	turtle->x = moveDifX;
 	turtle->y = moveDifY;
 	printf("move X %f, move Y %f\n", turtle->x, turtle->y);
 }
-
-
-
-
-
-
