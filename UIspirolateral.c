@@ -19,8 +19,8 @@ typedef struct parameters
 
 typedef struct turtle_parameters
 {
-	int x;
-	int y;
+	float x;
+	float y;
 	int angle;
 	int length;
 }turtle_parameters;
@@ -67,9 +67,9 @@ int main (void)
 	parameters para;
 	para.length = 20;
 	para.numOfSeg = 5;
-	para.angle = 50;
-	para.X = 250;
-	para.Y = 400;
+	para.angle = 130;
+	para.X = 400;
+	para.Y = 200;
 
 	turtle_parameters turtle;
 	turtle.x = para.X;
@@ -200,7 +200,7 @@ int main (void)
 								if (openCloseResult == 0)
 								{
 									printf("not closed\n");
-									for (int i = 1; i<= 1; i++)
+									for (int i = 1; i<= 36; i++)
 									{
 										turtle.length= para.length;
 										for (int j = 1; j<= para.numOfSeg; j++)
@@ -217,7 +217,7 @@ int main (void)
 							
 							
 								
-								pen_down(renderer, para.X, para.Y, para.length, c );
+								//pen_down(renderer, para.X, para.Y, para.length, c );
 									
 								SDL_RenderPresent(renderer);
 								
@@ -298,10 +298,13 @@ void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle,
 	tempY = turtle->y;
 	SDL_SetRenderDrawColor( renderer, 0, 0, 0, 0xFF );
 
-	Xdif = turtle->length*(sin(rad*(turtle->angle)));
-	turtle->x += (int)Xdif;
-	Ydif = turtle->length*(cos(rad*(turtle->angle)));
-	turtle->y += (int)Ydif;
+
+	Xdif = turtle->length*(cos(rad*(turtle->angle)));
+	turtle->x += Xdif;
+	
+	
+	Ydif = turtle->length*(sin(rad*(turtle->angle)));
+	turtle->y += Ydif;
 	
 	SDL_RenderDrawLine(renderer, (int)tempX, (int)tempY, (int)turtle->x, (int)turtle->y);
 	//max_coordinate_test(&turtle->xPos, &turtle->yPos, maxC);
