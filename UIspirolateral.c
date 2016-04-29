@@ -32,13 +32,6 @@ typedef struct max_coordinates
 	float minY;
 }max_coordinates;
 
-typedef struct scaleTranslateValue
-{
-	float scale;
-	int positionX;
-	int positionY;
-}scaleTranslateValue;
-
 typedef struct RGBcolour
 {
 	Uint8 r;
@@ -49,28 +42,25 @@ typedef struct RGBcolour
 
 
 int open_close_pattern( int, int);
-//void line_calculate(struct parameters para,struct  maxCoord * maxC, struct turtle_parameters * turtle);
 
-
-void bresenham_draw(int, int, int, int);
+//void bresenham_draw(int, int, int, int);
 
 void max_coordinate_test(float *, float *,max_coordinates * maxC);
 void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates * maxC, int , int );
 void transform_scale(struct max_coordinates maxC, struct turtle_parameters * turtle, float *, int maxResolution);
 
-//void transform_scale(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates * maxC, int, int);
 void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int, int);
 void pen_down(SDL_Renderer *, int, int, int, RGBcolour c);
 int max_cycles(float, float);
-
+void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates, int);
 
 int main (void)
 {
 	//setting the values for intial parameters of the turtle
 	parameters para;
 	para.length = 20;
-	para.numOfSeg = 5;
-	para.angle = 100;
+	para.numOfSeg = 10;
+	para.angle = 80;
 	para.X = 0;
 	para.Y = 0;
 
@@ -79,17 +69,6 @@ int main (void)
 	turtle.y = para.Y;
 	turtle.angle = para.angle;
 	turtle.length = para.length;
-
-
-
-	//float Xn = para.X;
-	//float Yn = para.Y;
-	//int angleN = para.angle;
-	//float *pXn = &Xn;
-	//float *pYn = &Yn;
-
-	//int *pAngleN = &angleN;
-
 
 	max_coordinates maxC;
 	maxC.maxX = para.X;
@@ -108,31 +87,6 @@ int main (void)
 	c.r = 0;
 	c.g = 0;
 	c.b = 0;
-	
-	
-	/*
-
-	int openCloseResult = open_close_pattern(para.angle, para.numOfSeg);
-
-
-	if (openCloseResult == 0)
-	{
-		printf("the pattern is close\n");
-		for(int i = 1; i<=para.numOfSeg; i++)
-		{
-			line_calculate(para, &maxC, &turtle); //max coordinates for closed pattern
-		}
-
-	}
-	else
-	{
-		printf("the pattern is open\n");
-		line_calculate(para, &maxC, &turtle);
-	}
-	transform_scale(maxC, &para.X, &para.Y, winWidth);
-	*/
-
-
 
 	// initialising SDL
 	if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
@@ -143,7 +97,6 @@ int main (void)
 		return -1;
 	}
 
-
 	int quit =0;
 
 	SDL_Window *window = SDL_CreateWindow("Spirolateral",  // The first parameter is the window title //
@@ -153,17 +106,14 @@ int main (void)
 
 
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
-	
-	
+
+
 	SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
-	
+
 	while (quit == 0)
 	{
-
-	
-
 		SDL_Event incomingEvent;
 		while( SDL_PollEvent( &incomingEvent ) )
 		{
@@ -180,7 +130,7 @@ int main (void)
 						printf("hi");
 						break;
 					}
-				
+
 				*/
 				case SDL_MOUSEBUTTONDOWN:
 				{
@@ -188,9 +138,6 @@ int main (void)
 					SDL_RenderClear(renderer);
 					switch (incomingEvent.button.button)
 					{
-					
-					
-					
 						case SDL_BUTTON_LEFT:
 						{
 							printf("LeftClick\n");
@@ -200,68 +147,22 @@ int main (void)
 							printf("hay %d\n", turtle.length);
 							if (x>=100)
 							{
-								para.length = 20;
+
 								turtle.length = para.length;
 								printf("hay %d\n", turtle.length);
-								int repeat = 20;
 								int openCloseResult  = open_close_pattern(para.angle, para.numOfSeg);
 								if (openCloseResult == 0)
 								{
-									int numOfCycles = max_cycles(para.angle, para.numOfSeg);
 									printf("closed\n");
-									for (int k = 1; k<= numOfCycles; k++)
-									{
-										turtle.length= para.length;
-										for (int d=1; d <=para.numOfSeg; d++)
-										{
-											find_max_coordinates(renderer, &turtle, &maxC, para.angle, para.length);
-										}
-										
-									} 
-									turtle.angle = para.angle;
-									transform_scale(maxC, &turtle, &para.length, winHeight);
-									for (int i = 1; i<=numOfCycles; i++)
-									{
-										turtle.length= para.length;
-										for (int j = 1; j<= para.numOfSeg; j++)
-										{
-											turtle_move(renderer, &turtle, para.angle, para.length);
-										}
-										
-									}
+									turtle_draw(renderer, para, turtle, maxC, winHeight);
 								}
 								else
 								{
 									printf("open\n");
-								int repeat = 5;
-									for (int k = 1; k<= repeat; k++)
-									{
-										turtle.length= para.length;
-										for (int d=1; d <=para.numOfSeg; d++)
-										{
-											find_max_coordinates(renderer, &turtle, &maxC, para.angle, para.length);
-										}
-										
-									} 
-									turtle.angle = para.angle;
-									transform_scale(maxC, &turtle, &para.length, winHeight);
-									for (int i = 1; i<= repeat; i++)
-									{
-										turtle.length= para.length;
-										for (int j = 1; j<= para.numOfSeg; j++)
-										{
-											turtle_move(renderer, &turtle, para.angle, para.length);
-										}
-										
-									}
+									turtle_draw(renderer, para, turtle, maxC, winHeight);
 								}
-							
-							
-								
-								//pen_down(renderer, para.X, para.Y, para.length, c );
-									
 								SDL_RenderPresent(renderer);
-								
+
 							}
 							break;
 						}
@@ -273,41 +174,62 @@ int main (void)
 					break;
 				}
 			}
-		
-		
 		}
 	}
-
-
 	SDL_DestroyWindow( window );
 	SDL_Quit();
 	return 0;
 }
 
+
+
+void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight)
+{
+	printf("length %d\n", para.angle);
+	int numOfCycles = max_cycles(para.angle, para.numOfSeg);
+
+	for (int k = 1; k<= numOfCycles; k++)
+	{
+		turtle.length= para.length;
+		for (int d=1; d <=para.numOfSeg; d++)
+		{
+			find_max_coordinates(renderer, &turtle, &maxC, para.angle, para.length);
+		}
+	}
+
+	turtle.angle = para.angle;
+	transform_scale(maxC, &turtle, &para.length, winHeight);
+	for (int i = 1; i<=numOfCycles; i++)
+	{
+		turtle.length= para.length;
+		for (int j = 1; j<= para.numOfSeg; j++)
+		{
+			turtle_move(renderer, &turtle, para.angle, para.length);
+		}
+	}
+}
+
+
 int max_cycles(float angle, float numOfSeg)
 {
-
+	printf("angle %f\n", numOfSeg);
 	angle = 180-angle;
-	float outcome;
+	printf("angle %f\n", angle);
+	float outcome = 1;
 	float i=0;
 	while (outcome !=0)
 	{
 		i++;
 		outcome = ((angle*numOfSeg)/(360/i));
-		printf ("oh hello outcome nice to see you %f\n", outcome);
 		outcome = fmod(outcome, 1);
-		
-		
-		printf ("oh hello i nice to see you %f\n", i);
 	}
-	printf("mememememmee %f", i);
 	if (angle == 80 && ((int)numOfSeg % 2 ==1))
 	{
 		i *=2;
 	}
-	
+
 	return i;
-	
+
 }
 
 
@@ -363,23 +285,16 @@ void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle,
 	float Xdif, Ydif;
 	float rad = PI/180;
 	float tempX, tempY;
-	
+
 	tempX = turtle->x;
 	tempY = turtle->y;
 	SDL_SetRenderDrawColor( renderer, 0, 0, 0, 0xFF );
-
-
+	
 	Xdif = turtle->length*(cos(rad*(turtle->angle)));
 	turtle->x += Xdif;
-	
-	
 	Ydif = turtle->length*(sin(rad*(turtle->angle)));
 	turtle->y += Ydif;
-	
 	SDL_RenderDrawLine(renderer, (int)tempX, (int)tempY, (int)turtle->x, (int)turtle->y);
-	
-	//length *=2;
-	
 	if (turtle->angle >= 360)
 	{
 		turtle->angle -=360;
@@ -417,15 +332,10 @@ void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, m
 
 	Xdif = turtle->length*(cos(rad*(turtle->angle)));
 	turtle->x += Xdif;
-	
-	
 	Ydif = turtle->length*(sin(rad*(turtle->angle)));
 	turtle->y += Ydif;
-	
+
 	max_coordinate_test(&turtle->x, &turtle->y, maxC);
-	
-	//length *=2;
-	
 	if (turtle->angle >= 360)
 	{
 		turtle->angle -=360;
@@ -436,17 +346,14 @@ void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, m
 
 void transform_scale(struct max_coordinates maxC, struct turtle_parameters * turtle, float * length, int maxResolution)
 {
-	scaleTranslateValue scaleTran;
 	printf("scmaxale %f\n", maxC.maxX);
 	int moveDifX = 0 - (int)maxC.minX;
 	int moveDifY = 0 - (int)maxC.minY;
 	float matrixT[3][3] = {{1, 0, moveDifX}, {0, 1, moveDifY}, {0,0,1}};
 	float minXYvalue[3] = {maxC.minX, maxC.minY, 1};
 	float maxXYvalue[3] = {maxC.maxX, maxC.maxY, 1};
-	float minTransformX = 0;
-	float minTransformY = 0;
-	float maxTransformX = 0;
-	float maxTransformY = 0;
+	
+	float minTransformX, minTransformY, maxTransformX, maxTransformY = 0;
 	float scale = 1;
 	printf("tranform %f\n", maxC.maxY);
 	printf("tranform %f\n", maxC.maxX);
@@ -466,20 +373,14 @@ void transform_scale(struct max_coordinates maxC, struct turtle_parameters * tur
 	maxC.maxY = maxTransformY;
 	printf("tranform %f\n", maxTransformX);
 	printf("tranform %f\n", maxC.maxX);
-	scaleTran.positionX = moveDifX;
-	scaleTran.positionY = moveDifY;
+
 
 	printf("scmaxale %f\n", maxC.maxX);
 	scale *= maxResolution/maxC.maxX;
-	/*
-	if (maxC.maxY>maxResolution)
-	{
-		
-	}
-	*/
+	scale *= maxResolution/maxC.maxY;
+
 	printf("scale %f\n", scale);
 
-	//scale *= maxResolution/maxC.maxY;
 	moveDifX *= scale;
 	moveDifY *= scale;
 	(*length)*= scale;
