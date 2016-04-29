@@ -61,7 +61,7 @@ void transform_scale(struct max_coordinates maxC, struct turtle_parameters * tur
 //void transform_scale(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates * maxC, int, int);
 void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int, int);
 void pen_down(SDL_Renderer *, int, int, int, RGBcolour c);
-int max_cycles(int, int);
+int max_cycles(float, float);
 
 
 int main (void)
@@ -284,21 +284,30 @@ int main (void)
 	return 0;
 }
 
-int max_cycles(int angle, int numOfSeg)
+int max_cycles(float angle, float numOfSeg)
 {
+
 	angle = 180-angle;
 	float outcome;
-	int i=1;
+	float i=0;
 	while (outcome !=0)
 	{
-		outcome = ((float)angle*((float)numOfSeg)/((float)360/(float)i));
+		i++;
+		outcome = ((angle*numOfSeg)/(360/i));
 		printf ("oh hello outcome nice to see you %f\n", outcome);
 		outcome = fmod(outcome, 1);
 		
-		i++;
-		printf ("oh hello i nice to see you %d\n", i);
+		
+		printf ("oh hello i nice to see you %f\n", i);
 	}
+	printf("mememememmee %f", i);
+	if (angle == 80 && ((int)numOfSeg % 2 ==1))
+	{
+		i *=2;
+	}
+	
 	return i;
+	
 }
 
 
