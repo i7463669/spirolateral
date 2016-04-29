@@ -415,7 +415,7 @@ void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, m
 	
 	max_coordinate_test(&turtle->x, &turtle->y, maxC);
 	
-	length *=2;
+	//length *=2;
 	
 	if (turtle->angle >= 360)
 	{
