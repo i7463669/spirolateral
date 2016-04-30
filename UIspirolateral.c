@@ -59,8 +59,8 @@ int main (void)
 	//setting the values for intial parameters of the turtle
 	parameters para;
 	para.length = 20;
-	para.numOfSeg = 10;
-	para.angle = 80;
+	para.numOfSeg = 8;
+	para.angle = 100;
 	para.X = 0;
 	para.Y = 0;
 
@@ -114,6 +114,9 @@ int main (void)
 
 	while (quit == 0)
 	{
+		SDL_RenderClear(renderer);
+		
+		
 		SDL_Event incomingEvent;
 		while( SDL_PollEvent( &incomingEvent ) )
 		{
