@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <math.h>
 #include <SDL2/SDL.h>
@@ -59,8 +57,8 @@ int main (void)
 	//setting the values for intial parameters of the turtle
 	parameters para;
 	para.length = 20;
-	para.numOfSeg = 8;
-	para.angle = 100;
+	para.numOfSeg = 10;
+	para.angle = 80;
 	para.X = 0;
 	para.Y = 0;
 
@@ -106,7 +104,7 @@ int main (void)
 
 
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
-
+	SDL_Surface *surface;
 
 	SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 	SDL_RenderClear(renderer);
@@ -114,9 +112,6 @@ int main (void)
 
 	while (quit == 0)
 	{
-		SDL_RenderClear(renderer);
-		
-		
 		SDL_Event incomingEvent;
 		while( SDL_PollEvent( &incomingEvent ) )
 		{
@@ -127,14 +122,7 @@ int main (void)
 					quit = 1;
 					break;
 				}
-				/*
-				case SDL_MOUSEMOTION:
-					{
-						printf("hi");
-						break;
-					}
 
-				*/
 				case SDL_MOUSEBUTTONDOWN:
 				{
 					SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
@@ -143,12 +131,13 @@ int main (void)
 					{
 						case SDL_BUTTON_LEFT:
 						{
+							
 							printf("LeftClick\n");
 							int x = incomingEvent.button.x;
 							//tests if the mouse position x is greater than 100
 							printf("X position\t%d\n", x);
 							printf("hay %d\n", turtle.length);
-							if (x>=100)
+							if (x>=500)
 							{
 
 								turtle.length = para.length;
@@ -165,8 +154,19 @@ int main (void)
 									turtle_draw(renderer, para, turtle, maxC, winHeight);
 								}
 								SDL_RenderPresent(renderer);
-
 							}
+							
+							
+							RGBcolour pcol;
+							Uint32 pixels[10]; /* pixel and safety buffer (although 1 should be enough) */
+							pcol.r=0;
+							pcol.g=0;
+							pcol.b=0;
+							
+							
+							
+							//SDL_Surface *surfaceEncode = SDL_ConvertrSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
+							 
 							break;
 						}
 						default:
@@ -207,8 +207,27 @@ void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters tur
 		turtle.length= para.length;
 		for (int j = 1; j<= para.numOfSeg; j++)
 		{
+			
+			
 			turtle_move(renderer, &turtle, para.angle, para.length);
+			
+
 		}
+			//********************************************************************************************************************************************************************************
+			//http://stackoverflow.com/questions/22315980/sdl2-c-taking-a-screenshot
+			char filepath[] = "screenshot";
+			sprintf(filepath, "screen%d.bmp", i);
+			printf("\n%s\n", filepath);
+			SDL_Surface *sshot = NULL; 
+			sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+			SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, sshot->pixels, sshot->pitch);
+			SDL_SaveBMP(sshot, filepath);
+			SDL_FreeSurface(sshot);
+			
+			free(sshot);
+			
+			
+			//************************************************************************************************************************************************************************
 	}
 }
 
