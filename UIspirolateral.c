@@ -57,8 +57,8 @@ int main (void)
 	//setting the values for intial parameters of the turtle
 	parameters para;
 	para.length = 10;
-	para.numOfSeg = 7;
-	para.angle = 150;
+	para.numOfSeg = 4;
+	para.angle = 160;
 	para.X = 0;
 	para.Y = 0;
 	
@@ -88,7 +88,7 @@ int main (void)
 	int winPosX = 100;
 	int winPosY = 100;
 	int winHeight = 500;
-	int winWidth = windHeigth + 400;
+	int winWidth = winHeight + 400;
 	RGBcolour c;
 	c.r = 0;
 	c.g = 0;
@@ -114,6 +114,20 @@ int main (void)
 	SDL_SetRenderDrawColor( renderer, backColour.r, backColour.g, backColour.b, 255 );
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
+	
+	
+	
+	SDL_Surface * UIelements = SDL_CreateRGBSurface(0, winWidth, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+	SDL_Rect UI;
+	UI.x = winHeight;
+	UI.y = 0;
+	UI.w = 400;
+	UI.h = winHeight;
+	SDL_FillRect(UIelements, &UI, SDL_MapRGB(UIelements->format, 255, 0, 0));
+	
+	
+	
+	
 	SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 	SDL_FillRect(sshot, NULL, SDL_MapRGB(sshot->format, backColour.r, backColour.g, backColour.b));
 	SDL_Texture * renderTexture = NULL;
@@ -144,7 +158,7 @@ int main (void)
 							//tests if the mouse position x is greater than 100
 							printf("X position\t%d\n", x);
 							printf("hay %d\n", turtle.length);
-							if (x>=100)
+							if (x>=winHeight)
 							{
 
 								turtle.length = para.length;
@@ -165,8 +179,10 @@ int main (void)
 								srcX.y = 0;
 								srcX.w = winHeight;
 								srcX.h = winHeight;
-								renderTexture = SDL_CreateTextureFromSurface(renderer, sshot);
-								SDL_RenderCopy(renderer, renderTexture, NULL, &srcX);
+								renderTexture = SDL_CreateTextureFromSurface(renderer, UIelements);
+								//renderTexture = SDL_CreateTextureFromSurface(renderer, sshot);
+								SDL_RenderCopy(renderer, renderTexture, NULL, NULL);
+								//SDL_RenderCopy(renderer, renderTexture, NULL, &srcX);
 								SDL_RenderPresent(renderer);
 
 							}
