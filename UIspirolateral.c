@@ -47,10 +47,12 @@ void max_coordinate_test(float *, float *,max_coordinates * maxC);
 void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates * maxC, int , int );
 void transform_scale(struct max_coordinates maxC, struct turtle_parameters * turtle, float *, int maxResolution);
 
-void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int, int);
+void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int, int, SDL_Surface * sshot);
 void pen_down(SDL_Renderer *, int, int, int, RGBcolour c);
 int max_cycles(float, float);
-void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates, int);
+void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates, int, SDL_Surface *);
+void Iline(SDL_Surface *img,int ,int ,int ,int , RGBcolour col);
+
 
 int main (void)
 {
@@ -100,16 +102,17 @@ int main (void)
 	SDL_Window *window = SDL_CreateWindow("Spirolateral",  // The first parameter is the window title //
 		winPosX, winPosY,
 		winWidth, winHeight,
-		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+		SDL_WINDOW_SHOWN);
 
 
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL_Surface *surface;
 
 	SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
-
+	SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+	SDL_FillRect(sshot, NULL, SDL_MapRGB(sshot->format, 255, 255, 255));
+	SDL_Texture * renderTexture = NULL;
 	while (quit == 0)
 	{
 		SDL_Event incomingEvent;
@@ -137,7 +140,7 @@ int main (void)
 							//tests if the mouse position x is greater than 100
 							printf("X position\t%d\n", x);
 							printf("hay %d\n", turtle.length);
-							if (x>=500)
+							if (x>=100)
 							{
 
 								turtle.length = para.length;
@@ -146,25 +149,23 @@ int main (void)
 								if (openCloseResult == 0)
 								{
 									printf("closed\n");
-									turtle_draw(renderer, para, turtle, maxC, winHeight);
+									turtle_draw(renderer, para, turtle, maxC, winHeight, sshot);
 								}
 								else
 								{
 									printf("open\n");
-									turtle_draw(renderer, para, turtle, maxC, winHeight);
+									turtle_draw(renderer, para, turtle, maxC, winHeight, sshot);
 								}
+								SDL_Rect srcX;
+								srcX.x = 0;
+								srcX.y = 0;
+								srcX.w = winHeight;
+								srcX.h = winHeight;
+								renderTexture = SDL_CreateTextureFromSurface(renderer, sshot);
+								SDL_RenderCopy(renderer, renderTexture, NULL, &srcX);
 								SDL_RenderPresent(renderer);
+								
 							}
-							
-							
-							RGBcolour pcol;
-							Uint32 pixels[10]; /* pixel and safety buffer (although 1 should be enough) */
-							pcol.r=0;
-							pcol.g=0;
-							pcol.b=0;
-							
-							
-							
 							//SDL_Surface *surfaceEncode = SDL_ConvertrSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
 							 
 							break;
@@ -186,7 +187,7 @@ int main (void)
 
 
 
-void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight)
+void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight, SDL_Surface * sshot)
 {
 	printf("length %d\n", para.angle);
 	int numOfCycles = max_cycles(para.angle, para.numOfSeg);
@@ -209,25 +210,26 @@ void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters tur
 		{
 			
 			
-			turtle_move(renderer, &turtle, para.angle, para.length);
+			turtle_move(renderer, &turtle, para.angle, para.length, sshot);
 			
 
 		}
-			//********************************************************************************************************************************************************************************
+		
+			//--------------------------------------------------------------------------------------------
 			//http://stackoverflow.com/questions/22315980/sdl2-c-taking-a-screenshot
 			char filepath[] = "screenshot";
 			sprintf(filepath, "screen%d.bmp", i);
 			printf("\n%s\n", filepath);
-			SDL_Surface *sshot = NULL; 
-			sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-			SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, sshot->pixels, sshot->pitch);
+			//SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+			//SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, sshot->pixels, sshot->pitch);
+			
 			SDL_SaveBMP(sshot, filepath);
-			SDL_FreeSurface(sshot);
-			
-			free(sshot);
+			//SDL_FreeSurface(sshot);
 			
 			
-			//************************************************************************************************************************************************************************
+			
+			//---------------------------------------------------------------------------------------
+			
 	}
 }
 
@@ -302,21 +304,28 @@ int open_close_pattern(int angle, int numOfSeg)
 	}
 }
 
-void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle, int length)
+void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle, int length, SDL_Surface * sshot)
 {
 	float Xdif, Ydif;
 	float rad = PI/180;
-	float tempX, tempY;
+	float X0, Y0;
+	RGBcolour col;
+	col.r = 0;
+	col.g = 0;
+	col.b = 0;
 
-	tempX = turtle->x;
-	tempY = turtle->y;
+
+	X0 = turtle->x;
+	Y0 = turtle->y;
 	SDL_SetRenderDrawColor( renderer, 0, 0, 0, 0xFF );
 	
 	Xdif = turtle->length*(cos(rad*(turtle->angle)));
 	turtle->x += Xdif;
 	Ydif = turtle->length*(sin(rad*(turtle->angle)));
 	turtle->y += Ydif;
-	SDL_RenderDrawLine(renderer, (int)tempX, (int)tempY, (int)turtle->x, (int)turtle->y);
+	//SDL_RenderDrawLine(renderer, (int)X0, (int)Y0, (int)turtle->x, (int)turtle->y);
+	Iline(sshot, X0, Y0, turtle->x, turtle->y, col);
+
 	if (turtle->angle >= 360)
 	{
 		turtle->angle -=360;
@@ -324,6 +333,30 @@ void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle,
 	turtle->angle += angle;
 	turtle->length += length;
 }
+//-------------------------------------------------------------------------------------------------------------------------------
+//Eikes code
+void Iline(SDL_Surface *img,int x0,int y0,int xn,int yn,RGBcolour col)
+{
+	int dx = abs(xn-x0), sx = x0<xn ? 1 : -1;
+	int dy = abs(yn-y0), sy = y0<yn ? 1 : -1;
+	int error = (dx>dy ? dx : -dy)/2, e2;
+	Uint32 pixel = SDL_MapRGB(img->format,col.r,col.g,col.b);
+	Uint32 *pixels = (Uint32*)img->pixels; /* pixel array in the SDL_Surface record */
+	while(1)
+	{
+		/* draw point only if coordinate is valid, i.e. within the pixel array */
+		/* x0+y0*img->w is the 1D offset location for the 2D pixel coordinate (x0,y0) */
+		if(x0>=0 && x0<img->w && y0>=0 && y0<img->h) pixels[x0+y0*img->w]=pixel;
+		if(x0==xn && y0==yn) break;
+		e2 = error;
+		if(e2 >-dx) { error -= dy; x0 += sx; }
+		if(e2 < dy) { error += dx; y0 += sy; }
+	}
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
 void max_coordinate_test(float *pXn, float *pYn, struct max_coordinates * maxC)
 {
