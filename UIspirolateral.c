@@ -41,16 +41,14 @@ typedef struct RGBcolour
 
 int open_close_pattern( int, int);
 
-//void bresenham_draw(int, int, int, int);
-
 void max_coordinate_test(float *, float *,max_coordinates * maxC);
 void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates * maxC, int , int );
 void transform_scale(struct max_coordinates maxC, struct turtle_parameters * turtle, float *, int maxResolution);
 
-void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int, int, SDL_Surface * sshot);
-void pen_down(SDL_Renderer *, int, int, int, RGBcolour c);
+void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int, int, SDL_Surface * sshot, RGBcolour);
+//void pen_down(SDL_Renderer *, int, int, int, RGBcolour c);
 int max_cycles(float, float);
-void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates, int, SDL_Surface *);
+void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates, int, SDL_Surface *, RGBcolour);
 void Iline(SDL_Surface *img,int ,int ,int ,int , RGBcolour col);
 
 
@@ -58,11 +56,21 @@ int main (void)
 {
 	//setting the values for intial parameters of the turtle
 	parameters para;
-	para.length = 20;
-	para.numOfSeg = 10;
-	para.angle = 80;
+	para.length = 10;
+	para.numOfSeg = 7;
+	para.angle = 150;
 	para.X = 0;
 	para.Y = 0;
+	
+	RGBcolour lineColour;
+	lineColour.r = 0;
+	lineColour.g = 0;
+	lineColour.b = 0;
+
+	RGBcolour backColour;
+	backColour.r = 255;
+	backColour.g = 255;
+	backColour.b = 255;
 
 	turtle_parameters turtle;
 	turtle.x = para.X;
@@ -77,12 +85,10 @@ int main (void)
 	maxC.minY = para.Y;
 
 
-
 	int winPosX = 100;
 	int winPosY = 100;
-	int winWidth = 600;
 	int winHeight = 500;
-
+	int winWidth = windHeigth + 400;
 	RGBcolour c;
 	c.r = 0;
 	c.g = 0;
@@ -96,9 +102,7 @@ int main (void)
 		//returns -1 to show something went wrong
 		return -1;
 	}
-
 	int quit =0;
-
 	SDL_Window *window = SDL_CreateWindow("Spirolateral",  // The first parameter is the window title //
 		winPosX, winPosY,
 		winWidth, winHeight,
@@ -107,11 +111,11 @@ int main (void)
 
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
 
-	SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+	SDL_SetRenderDrawColor( renderer, backColour.r, backColour.g, backColour.b, 255 );
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
 	SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-	SDL_FillRect(sshot, NULL, SDL_MapRGB(sshot->format, 255, 255, 255));
+	SDL_FillRect(sshot, NULL, SDL_MapRGB(sshot->format, backColour.r, backColour.g, backColour.b));
 	SDL_Texture * renderTexture = NULL;
 	while (quit == 0)
 	{
@@ -134,7 +138,7 @@ int main (void)
 					{
 						case SDL_BUTTON_LEFT:
 						{
-							
+
 							printf("LeftClick\n");
 							int x = incomingEvent.button.x;
 							//tests if the mouse position x is greater than 100
@@ -149,12 +153,12 @@ int main (void)
 								if (openCloseResult == 0)
 								{
 									printf("closed\n");
-									turtle_draw(renderer, para, turtle, maxC, winHeight, sshot);
+									turtle_draw(renderer, para, turtle, maxC, winHeight, sshot, lineColour);
 								}
 								else
 								{
 									printf("open\n");
-									turtle_draw(renderer, para, turtle, maxC, winHeight, sshot);
+									turtle_draw(renderer, para, turtle, maxC, winHeight, sshot, lineColour);
 								}
 								SDL_Rect srcX;
 								srcX.x = 0;
@@ -164,10 +168,10 @@ int main (void)
 								renderTexture = SDL_CreateTextureFromSurface(renderer, sshot);
 								SDL_RenderCopy(renderer, renderTexture, NULL, &srcX);
 								SDL_RenderPresent(renderer);
-								
+
 							}
 							//SDL_Surface *surfaceEncode = SDL_ConvertrSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
-							 
+
 							break;
 						}
 						default:
@@ -187,7 +191,7 @@ int main (void)
 
 
 
-void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight, SDL_Surface * sshot)
+void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight, SDL_Surface * sshot, RGBcolour lineColour)
 {
 	printf("length %d\n", para.angle);
 	int numOfCycles = max_cycles(para.angle, para.numOfSeg);
@@ -208,13 +212,13 @@ void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters tur
 		turtle.length= para.length;
 		for (int j = 1; j<= para.numOfSeg; j++)
 		{
-			
-			
-			turtle_move(renderer, &turtle, para.angle, para.length, sshot);
-			
+
+
+			turtle_move(renderer, &turtle, para.angle, para.length, sshot, lineColour);
+
 
 		}
-		
+
 			//--------------------------------------------------------------------------------------------
 			//http://stackoverflow.com/questions/22315980/sdl2-c-taking-a-screenshot
 			char filepath[] = "screenshot";
@@ -222,14 +226,14 @@ void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters tur
 			printf("\n%s\n", filepath);
 			//SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 			//SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, sshot->pixels, sshot->pitch);
-			
+
 			SDL_SaveBMP(sshot, filepath);
 			//SDL_FreeSurface(sshot);
-			
-			
-			
+
+
+
 			//---------------------------------------------------------------------------------------
-			
+
 	}
 }
 
@@ -257,7 +261,7 @@ int max_cycles(float angle, float numOfSeg)
 }
 
 
-
+/*
 void pen_down(SDL_Renderer *renderer, int x0, int y0, int length, RGBcolour c)
 {
 	SDL_SetRenderDrawColor(renderer,c.r,c.g,c.b,255);
@@ -268,6 +272,8 @@ void pen_down(SDL_Renderer *renderer, int x0, int y0, int length, RGBcolour c)
 	}
 
 }
+*/
+
 
 int open_close_pattern(int angle, int numOfSeg)
 {
@@ -304,27 +310,23 @@ int open_close_pattern(int angle, int numOfSeg)
 	}
 }
 
-void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle, int length, SDL_Surface * sshot)
+void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle, int length, SDL_Surface * sshot, RGBcolour lineColour)
 {
 	float Xdif, Ydif;
 	float rad = PI/180;
 	float X0, Y0;
-	RGBcolour col;
-	col.r = 0;
-	col.g = 0;
-	col.b = 0;
 
 
 	X0 = turtle->x;
 	Y0 = turtle->y;
-	SDL_SetRenderDrawColor( renderer, 0, 0, 0, 0xFF );
-	
+	//SDL_SetRenderDrawColor( renderer, 0, 0, 0, 0xFF );
+
 	Xdif = turtle->length*(cos(rad*(turtle->angle)));
 	turtle->x += Xdif;
 	Ydif = turtle->length*(sin(rad*(turtle->angle)));
 	turtle->y += Ydif;
 	//SDL_RenderDrawLine(renderer, (int)X0, (int)Y0, (int)turtle->x, (int)turtle->y);
-	Iline(sshot, X0, Y0, turtle->x, turtle->y, col);
+	Iline(sshot, X0, Y0, turtle->x, turtle->y, lineColour);
 
 	if (turtle->angle >= 360)
 	{
@@ -402,12 +404,12 @@ void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, m
 void transform_scale(struct max_coordinates maxC, struct turtle_parameters * turtle, float * length, int maxResolution)
 {
 	printf("scmaxale %f\n", maxC.maxX);
-	int moveDifX = 0 - (int)maxC.minX;
-	int moveDifY = 0 - (int)maxC.minY;
+	int moveDifX = (0+1) - (int)maxC.minX;
+	int moveDifY = (0+1) - (int)maxC.minY;
 	float matrixT[3][3] = {{1, 0, moveDifX}, {0, 1, moveDifY}, {0,0,1}};
 	float minXYvalue[3] = {maxC.minX, maxC.minY, 1};
 	float maxXYvalue[3] = {maxC.maxX, maxC.maxY, 1};
-	
+
 	float minTransformX, minTransformY, maxTransformX, maxTransformY = 0;
 	float scale = 1;
 	printf("tranform %f\n", maxC.maxY);
@@ -426,17 +428,26 @@ void transform_scale(struct max_coordinates maxC, struct turtle_parameters * tur
 	maxC.minY = minTransformY;
 	maxC.maxX = maxTransformX;
 	maxC.maxY = maxTransformY;
-	printf("tranform %f\n", maxTransformX);
-	printf("tranform %f\n", maxC.maxX);
+	printf("X tranform %f\n", maxC.maxY);
+	printf("Y tranform %f\n", maxC.maxX);
 
 
 	printf("scmaxale %f\n", maxC.maxX);
-	scale *= maxResolution/maxC.maxX;
-	scale *= maxResolution/maxC.maxY;
+	scale *= (maxResolution-10)/maxC.maxX;
+	maxC.maxX *=scale;
+	maxC.maxY *=scale;
+		printf("scale %f\n", scale);
+
+	if (maxC.maxY > maxResolution)
+	{
+		scale *= (maxResolution-10)/maxC.maxY;
+	}
+
 
 	printf("scale %f\n", scale);
 
 	moveDifX *= scale;
+
 	moveDifY *= scale;
 	(*length)*= scale;
 
