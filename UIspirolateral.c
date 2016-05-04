@@ -66,7 +66,7 @@ int main (void)
 	parameters para;
 	para.length = 10;
 	para.numOfSeg = 15;
-	para.angle = 124;
+	para.angle = 56;
 	para.X = 0;
 	para.Y = 0;
 	
@@ -172,6 +172,8 @@ int main (void)
 	char bgcgreenText[4];
 	char bgcblueText[4];
 	char angleText[4];
+	char numOfSegText[4];
+	char lengthText[4];
 	SDL_Color colour = { 0, 0, 0 };
 	TTF_Font *font = TTF_OpenFont("arial.ttf", 100);
 		
@@ -203,6 +205,17 @@ int main (void)
 	sprintf(angleText, "%03d", para.angle);
 	SDL_Surface *angleTextSurf = TTF_RenderText_Solid(font,angleText, colour);
 	SDL_Texture *angleTextTex = SDL_CreateTextureFromSurface(renderer,angleTextSurf);
+	
+	sprintf(numOfSegText, "%03d", para.numOfSeg);
+	SDL_Surface *numOfSegTextSurf = TTF_RenderText_Solid(font,numOfSegText, colour);
+	SDL_Texture *numOfSegTextTex = SDL_CreateTextureFromSurface(renderer,numOfSegTextSurf);
+	
+	sprintf(lengthText, "%03d", (int)para.length);
+	SDL_Surface *lengthTextSurf = TTF_RenderText_Solid(font,lengthText, colour);
+	SDL_Texture *lengthTextTex = SDL_CreateTextureFromSurface(renderer,lengthTextSurf);
+	
+	
+	
 	
 	
 	
@@ -249,6 +262,18 @@ int main (void)
 	angleBox.w = 50;
 	angleBox.h = 25;
 	
+	SDL_Rect numOfSegBox;
+	numOfSegBox.x = winHeight+150;
+	numOfSegBox.y = 300;
+	numOfSegBox.w = 50;
+	numOfSegBox.h = 25;
+	
+	SDL_Rect lengthBox;
+	lengthBox.x = winHeight+300;
+	lengthBox.y = 350;
+	lengthBox.w = 50;
+	lengthBox.h = 25;
+	
 	
 	
 	SDL_RenderCopy(renderer, lcredTextTex, NULL, &lcrBox);
@@ -262,7 +287,8 @@ int main (void)
 	
 	
 	SDL_RenderCopy(renderer, angleTextTex, NULL, &angleBox);
-	
+	SDL_RenderCopy(renderer, numOfSegTextTex, NULL, &numOfSegBox);
+	SDL_RenderCopy(renderer, lengthTextTex, NULL, &lengthBox);
 	SDL_RenderPresent(renderer);
 	//SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 	//SDL_FillRect(sshot, NULL, SDL_MapRGB(sshot->format, backColour.r, backColour.g, backColour.b));
@@ -323,6 +349,47 @@ int main (void)
 
 							}
 							
+							if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= 300)&&(y<=325))
+							{
+								printf("YES");
+								if (para.numOfSeg> 1)
+								{
+									para.numOfSeg-=1;
+								}
+
+							}
+							if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= 300)&&(y<=325))
+							{
+								if (para.numOfSeg< 16)
+								{
+									para.numOfSeg +=1;
+								}
+
+							}
+							
+							
+							
+							if (x>=(winHeight+275)&&(x<= winHeight+300)&&(y >= 350)&&(y<=375))
+							{
+								printf("why is this not working %d\n", (int)para.length);
+								printf("YES\n");
+								if (para.length> 1)
+								{
+									para.length -= 1;
+									printf("why is this not working %d\n", (int)para.length);
+								}
+
+							}
+							if (x>=(winHeight+275)&&(x<= winHeight+300)&&(y >= 350)&&(y<=375))
+							{
+								if (para.length< 100)
+								{
+									para.length += 1;
+								}
+
+							}
+							
+							
 							
 							
 							
@@ -363,7 +430,7 @@ int main (void)
 							{
 								printf("\nproblem\n");
 								para.numOfSeg = 5;
-								para.angle = 140;
+								para.angle = 40;
 							}
 							
 							
@@ -461,6 +528,14 @@ int main (void)
 								SDL_Surface *angleTextSurf = TTF_RenderText_Solid(font,angleText, colour);
 								SDL_Texture *angleTextTex = SDL_CreateTextureFromSurface(renderer,angleTextSurf);
 								
+								sprintf(numOfSegText, "%03d", para.numOfSeg);
+								SDL_Surface *numOfSegTextSurf = TTF_RenderText_Solid(font,numOfSegText, colour);
+								SDL_Texture *numOfSegTextTex = SDL_CreateTextureFromSurface(renderer,numOfSegTextSurf);
+								
+								sprintf(lengthText, "%03d", (int)para.length);
+								SDL_Surface *lengthTextSurf = TTF_RenderText_Solid(font,lengthText, colour);
+								SDL_Texture *lengthTextTex = SDL_CreateTextureFromSurface(renderer,lengthTextSurf);
+								printf("length %f\n", para.length);
 								
 								
 								SDL_RenderCopy(renderer, bgcredTextTex, NULL, &bgcrBox);
@@ -471,6 +546,8 @@ int main (void)
 								SDL_RenderCopy(renderer, lcgreenTextTex, NULL, &lcgBox);
 								SDL_RenderCopy(renderer, lcblueTextTex, NULL, &lcbBox);
 								SDL_RenderCopy(renderer, angleTextTex, NULL, &angleBox);
+								SDL_RenderCopy(renderer, numOfSegTextTex, NULL, &numOfSegBox);
+								SDL_RenderCopy(renderer, lengthTextTex, NULL, &lengthBox);
 								
 								
 								SDL_RenderPresent(renderer);
@@ -582,7 +659,7 @@ void field_change(Uint8 * field, SDL_Surface * textSurf, SDL_Texture *textTex, S
 
 void drawingOperation(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight,SDL_Surface * sshot, RGBcolour lineColour, int captSet, int autoScale)
 {
-
+	para.angle = 180-para.angle;
 	turtle.angle = para.angle;
 	turtle.length = para.length;
 	int openCloseResult  = open_close_pattern(para.angle, para.numOfSeg);
@@ -601,6 +678,7 @@ void drawingOperation(SDL_Renderer * renderer, parameters para, turtle_parameter
 void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight, SDL_Surface * sshot, RGBcolour lineColour, int captSet, int autoScale)
 {
 	printf("length %d\n", para.angle);
+	
 	int numOfCycles = max_cycles(para.angle, para.numOfSeg);
 
 	for (int k = 1; k<= numOfCycles; k++)
@@ -647,7 +725,6 @@ void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters tur
 int max_cycles(float angle, float numOfSeg)
 {
 	printf("angle %f\n", numOfSeg);
-	angle = 180-angle;
 	printf("angle %f\n", angle);
 	float outcome = 1;
 	float i=0;
@@ -683,7 +760,6 @@ void pen_down(SDL_Renderer *renderer, int x0, int y0, int length, RGBcolour c)
 
 int open_close_pattern(int angle, int numOfSeg)
 {
-	angle = 180-angle;
 	printf ("%d\n", angle);
 	if ((numOfSeg*angle)%180 ==0)
 	{
