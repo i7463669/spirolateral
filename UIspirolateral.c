@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-
+#include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL.h>
 
 
@@ -54,6 +54,11 @@ void Iline(SDL_Surface *img,int ,int ,int ,int , RGBcolour col);
 
 void drawingOperation(SDL_Renderer * renderer, parameters , turtle_parameters , max_coordinates , int ,SDL_Surface * , RGBcolour, int, int );
 
+void field_change(Uint8 *, SDL_Surface *, SDL_Texture *, SDL_Renderer *, SDL_Color , char *, int, TTF_Font *);
+void colourOptions(int, int, RGBcolour *colours , int, int);
+
+
+
 
 int main (void)
 {
@@ -66,7 +71,7 @@ int main (void)
 	para.Y = 0;
 	
 	RGBcolour lineColour;
-	lineColour.r = 255;
+	lineColour.r = 10;
 	lineColour.g = 255;
 	lineColour.b = 255;
 
@@ -99,6 +104,14 @@ int main (void)
 	c.b = 0;
 	*/
 	// initialising SDL
+	TTF_Init();
+	if( TTF_Init() != 0 )
+	{
+
+		perror("Error");
+		//returns -1 to show something went wrong
+		return -1;
+	}
 	if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
 	{
 
@@ -146,11 +159,111 @@ int main (void)
 	SDL_Surface * UIlayout = SDL_LoadBMP("UILayout.bmp");
 	SDL_Texture * UIlayoutTex = SDL_CreateTextureFromSurface(renderer, UIlayout);
 	SDL_RenderCopy(renderer, UIlayoutTex, NULL, &UIbox);
-	SDL_RenderPresent(renderer);
+	
+	
 	int autoScale =1;
 	
+	//int textpos = winHeight+150;
+	char lcredText[4];
+	char lcgreenText[4];
+	char lcblueText[4];
+	
+	char bgcredText[4];
+	char bgcgreenText[4];
+	char bgcblueText[4];
+	char angleText[4];
+	SDL_Color colour = { 0, 0, 0 };
+	TTF_Font *font = TTF_OpenFont("arial.ttf", 100);
+		
+		
+	sprintf(lcredText, "%03d", lineColour.r);
+	SDL_Surface *lcredTextSurf = TTF_RenderText_Solid(font,lcredText, colour);
+	SDL_Texture *lcredTextTex = SDL_CreateTextureFromSurface(renderer,lcredTextSurf);
+	
+	sprintf(lcgreenText, "%03d", lineColour.g);
+	SDL_Surface *lcgreenTextSurf = TTF_RenderText_Solid(font,lcgreenText, colour);
+	SDL_Texture *lcgreenTextTex = SDL_CreateTextureFromSurface(renderer,lcgreenTextSurf);
+	
+	sprintf(lcblueText, "%03d", lineColour.b);
+	SDL_Surface *lcblueTextSurf = TTF_RenderText_Solid(font,lcblueText, colour);
+	SDL_Texture *lcblueTextTex = SDL_CreateTextureFromSurface(renderer,lcblueTextSurf);
+	
+	sprintf(bgcredText, "%03d", backColour.r);
+	SDL_Surface *bgcredTextSurf = TTF_RenderText_Solid(font,bgcredText, colour);
+	SDL_Texture *bgcredTextTex = SDL_CreateTextureFromSurface(renderer,bgcredTextSurf);
+	
+	sprintf(bgcgreenText, "%03d", backColour.g);
+	SDL_Surface *bgcgreenTextSurf = TTF_RenderText_Solid(font,bgcgreenText, colour);
+	SDL_Texture *bgcgreenTextTex = SDL_CreateTextureFromSurface(renderer,bgcgreenTextSurf);
+	
+	sprintf(bgcblueText, "%03d", backColour.b);
+	SDL_Surface *bgcblueTextSurf = TTF_RenderText_Solid(font,bgcblueText, colour);
+	SDL_Texture *bgcblueTextTex = SDL_CreateTextureFromSurface(renderer,bgcblueTextSurf);
+	
+	sprintf(angleText, "%03d", para.angle);
+	SDL_Surface *angleTextSurf = TTF_RenderText_Solid(font,angleText, colour);
+	SDL_Texture *angleTextTex = SDL_CreateTextureFromSurface(renderer,angleTextSurf);
 	
 	
+	
+	SDL_Rect lcrBox;
+	lcrBox.x = winHeight+150;
+	lcrBox.y = 50;
+	lcrBox.w = 50;
+	lcrBox.h = 25;
+	
+	SDL_Rect lcgBox;
+	lcgBox.x = winHeight+150;
+	lcgBox.y = 75;
+	lcgBox.w = 50;
+	lcgBox.h = 25;
+	
+	SDL_Rect lcbBox;
+	lcbBox.x = winHeight+150;
+	lcbBox.y = 100;
+	lcbBox.w = 50;
+	lcbBox.h = 25;
+	
+	
+	SDL_Rect bgcrBox;
+	bgcrBox.x = winHeight+150;
+	bgcrBox.y = 150;
+	bgcrBox.w = 50;
+	bgcrBox.h = 25;
+	
+	SDL_Rect bgcgBox;
+	bgcgBox.x = winHeight+150;
+	bgcgBox.y = 175;
+	bgcgBox.w = 50;
+	bgcgBox.h = 25;
+	
+	SDL_Rect bgcbBox;
+	bgcbBox.x = winHeight+150;
+	bgcbBox.y = 200;
+	bgcbBox.w = 50;
+	bgcbBox.h = 25;
+	
+	SDL_Rect angleBox;
+	angleBox.x = winHeight+150;
+	angleBox.y = 250;
+	angleBox.w = 50;
+	angleBox.h = 25;
+	
+	
+	
+	SDL_RenderCopy(renderer, lcredTextTex, NULL, &lcrBox);
+	SDL_RenderCopy(renderer, lcgreenTextTex, NULL, &lcgBox);
+	SDL_RenderCopy(renderer, lcblueTextTex, NULL, &lcbBox);
+	
+	SDL_RenderCopy(renderer, bgcredTextTex, NULL, &bgcrBox);
+	SDL_RenderCopy(renderer, bgcgreenTextTex, NULL, &bgcgBox);
+	SDL_RenderCopy(renderer, bgcblueTextTex, NULL, &bgcbBox);
+	
+	
+	
+	SDL_RenderCopy(renderer, angleTextTex, NULL, &angleBox);
+	
+	SDL_RenderPresent(renderer);
 	//SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 	//SDL_FillRect(sshot, NULL, SDL_MapRGB(sshot->format, backColour.r, backColour.g, backColour.b));
 	
@@ -178,7 +291,7 @@ int main (void)
 					{
 						case SDL_BUTTON_LEFT:
 						{
-							
+							int incre_type=-1;
 
 							printf("LeftClick\n");
 							int x = incomingEvent.button.x;
@@ -186,6 +299,35 @@ int main (void)
 							//tests if the mouse position x is greater than 100
 							printf("X position\t%d\n", x);
 							int captSet = 0;
+							int lcOffset= 50;
+							int bgcOffset = 150;
+							colourOptions(x, y, &lineColour, winHeight, lcOffset);
+							colourOptions(x, y, &backColour, winHeight, bgcOffset);
+							
+							
+							if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= 250)&&(y<=275))
+							{
+								printf("YES");
+								if (para.angle> 1)
+								{
+									para.angle-=1;
+								}
+
+							}
+							if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= 250)&&(y<=275))
+							{
+								if (para.angle< 179)
+								{
+									para.angle +=1;
+								}
+
+							}
+							
+							
+							
+							
+							
+							
 							
 							if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= 400)&&(y<=425))
 							{
@@ -223,8 +365,6 @@ int main (void)
 								para.numOfSeg = 5;
 								para.angle = 140;
 							}
-							
-							
 							
 							
 							if (x>=(winHeight+50)&&(x<= winHeight+150) &&(y >= 350)&&(y<=375))
@@ -269,20 +409,73 @@ int main (void)
 								}
 								*/
 								
+								/*
+								sprintf(lcredText, "%03d", lineColour.r);
+								SDL_Surface *textSurf = TTF_RenderText_Solid(lcredText,lineCr, colour);
+								textTex = SDL_CreateTextureFromSurface(renderer,textSurf);
+								*/
+								
+								
+								
 								SDL_Rect spiral;
 								spiral.x = 0;
 								spiral.y = 0;
 								spiral.w = winHeight;
 								spiral.h = winHeight;
-								//UItexture = SDL_CreateTextureFromSurface(renderer, UIbg);
+								UItexture = SDL_CreateTextureFromSurface(renderer, UIbg);
 								SDL_RenderCopy(renderer, UItexture, NULL, NULL);
 								renderTexture = SDL_CreateTextureFromSurface(renderer, sshot);
 								SDL_RenderCopy(renderer, renderTexture, NULL, &spiral);
 								
 								
 								SDL_RenderCopy(renderer, UIlayoutTex, NULL, &UIbox);
+								
+								
+								//SDL_RenderCopy(renderer, textTex, NULL, &crBox);
+								//SDL_FreeSurface(textSurf);
+								sprintf(lcredText, "%03d", lineColour.r);
+								SDL_Surface *lcredTextSurf = TTF_RenderText_Solid(font,lcredText, colour);
+								SDL_Texture *lcredTextTex = SDL_CreateTextureFromSurface(renderer,lcredTextSurf);
+								
+								sprintf(lcgreenText, "%03d", lineColour.g);
+								SDL_Surface *lcgreenTextSurf = TTF_RenderText_Solid(font,lcgreenText, colour);
+								SDL_Texture *lcgreenTextTex = SDL_CreateTextureFromSurface(renderer,lcgreenTextSurf);
+								
+								sprintf(lcblueText, "%03d", lineColour.b);
+								SDL_Surface *lcblueTextSurf = TTF_RenderText_Solid(font,lcblueText, colour);
+								SDL_Texture *lcblueTextTex = SDL_CreateTextureFromSurface(renderer,lcblueTextSurf);
+								
+								sprintf(bgcredText, "%03d", backColour.r);
+								SDL_Surface *bgcredTextSurf = TTF_RenderText_Solid(font,bgcredText, colour);
+								SDL_Texture *bgcredTextTex = SDL_CreateTextureFromSurface(renderer,bgcredTextSurf);
+								
+								sprintf(bgcgreenText, "%03d", backColour.g);
+								SDL_Surface *bgcgreenTextSurf = TTF_RenderText_Solid(font,bgcgreenText, colour);
+								SDL_Texture *bgcgreenTextTex = SDL_CreateTextureFromSurface(renderer,bgcgreenTextSurf);
+								
+								sprintf(bgcblueText, "%03d", backColour.b);
+								SDL_Surface *bgcblueTextSurf = TTF_RenderText_Solid(font,bgcblueText, colour);
+								SDL_Texture *bgcblueTextTex = SDL_CreateTextureFromSurface(renderer,bgcblueTextSurf);
+								
+								sprintf(angleText, "%03d", para.angle);
+								SDL_Surface *angleTextSurf = TTF_RenderText_Solid(font,angleText, colour);
+								SDL_Texture *angleTextTex = SDL_CreateTextureFromSurface(renderer,angleTextSurf);
+								
+								
+								
+								SDL_RenderCopy(renderer, bgcredTextTex, NULL, &bgcrBox);
+								SDL_RenderCopy(renderer, bgcgreenTextTex, NULL, &bgcgBox);
+								SDL_RenderCopy(renderer, bgcblueTextTex, NULL, &bgcbBox);
+								
+								SDL_RenderCopy(renderer, lcredTextTex, NULL, &lcrBox);
+								SDL_RenderCopy(renderer, lcgreenTextTex, NULL, &lcgBox);
+								SDL_RenderCopy(renderer, lcblueTextTex, NULL, &lcbBox);
+								SDL_RenderCopy(renderer, angleTextTex, NULL, &angleBox);
+								
+								
 								SDL_RenderPresent(renderer);
-								SDL_FreeSurface(sshot);
+								//SDL_FreeSurface(textSurf);
+								SDL_RenderClear(renderer);
 
 							
 							//SDL_Surface *surfaceEncode = SDL_ConvertrSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
@@ -307,6 +500,84 @@ int main (void)
 	SDL_Quit();
 	return 0;
 }
+
+void colourOptions(int x, int y, RGBcolour *colour, int winHeight, int offset)
+{
+	if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= offset)&&(y<=offset+25))
+	{
+		if (colour->r> 0)
+		{
+			colour->r -=1;
+		}
+
+	}
+	
+	if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= offset)&&(y<=offset+25))
+	{
+		if (colour->r< 255)
+		{
+			colour->r +=1;
+		}
+	}
+	
+	
+	if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= offset+25)&&(y<=offset+50))
+	{
+		if (colour->g> 0)
+		{
+			colour->g -=1;
+		}
+
+	}
+	
+	if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= offset+25)&&(y<=offset+50))
+	{
+		if (colour->g< 255)
+		{
+			colour->g +=1;
+		}
+	}
+	
+	if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= offset+50)&&(y<=offset+75))
+	{
+		if (colour->b> 0)
+		{
+			colour->b -=1;
+		}
+
+	}
+	
+	if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= offset+50)&&(y<=offset+75))
+	{
+		if (colour->b< 255)
+		{
+			colour->b +=1;
+		}
+	}
+}
+
+
+
+
+void field_change(Uint8 * field, SDL_Surface * textSurf, SDL_Texture *textTex, SDL_Renderer * renderer, SDL_Color colour, char * lineCr, int incre_type, TTF_Font *font)
+{
+	if (incre_type == -1)
+	{
+		field -=1;
+	}
+	else
+	{
+		field +=1;
+	}
+	
+	sprintf(lineCr, "%03d", *field);
+	textSurf = TTF_RenderText_Solid(font, lineCr, colour);
+	textTex = SDL_CreateTextureFromSurface(renderer,textSurf);
+}
+
+
+
+
 
 
 void drawingOperation(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight,SDL_Surface * sshot, RGBcolour lineColour, int captSet, int autoScale)

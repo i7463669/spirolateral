@@ -1,8 +1,8 @@
 # make file for spirolateral
 # spirolateral.o
-OBJECTS = UIspirolateral.c
+OBJECTS = UIspirolateral.o
 PROGNAME = UIspirolateral
-OUTPUT =-lm -l SDL2 -o
+OUTPUT =-l SDL2 -l SDL2_ttf -lm -o
 OPTIONS = -std=c89 -c
 COMPILER = clang
 
@@ -10,6 +10,8 @@ $(PROGNAME) : $(OBJECTS)
 	$(COMPILER) $(OBJECTS) $(OUTPUT) $(PROGNAME)
 	
 	
+	
+#-L /usr/local/lib 
 #spirolateral.o: spirolateral.c
 #$(COMPILER) $(OPTIONS) spirolateral.c
 	
