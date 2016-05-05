@@ -3,11 +3,9 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL.h>
 
-
-
 #define PI 3.14159265
 
-/* define functions */
+/*Define Structures */
 typedef struct parameters
 {
 	int X;
@@ -40,36 +38,46 @@ typedef struct RGBcolour
 }RGBcolour;
 
 
+/* Function prototypes */
 
-int open_close_pattern( int, int);
 void max_coordinate_test(float *, float *,max_coordinates * maxC);
-void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates * maxC, int , int );
 void transform_scale(struct max_coordinates maxC, struct turtle_parameters * turtle, float *, int maxResolution, int);
 
-void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int, int, SDL_Surface * sshot, RGBcolour);
-//void pen_down(SDL_Renderer *, int, int, int, RGBcolour c);
+void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates *maxC, int, int, SDL_Surface * sshot, RGBcolour, int);
 int max_cycles(float, float);
-void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates, int, SDL_Surface *, RGBcolour, int, int);
+void turtle_draw(SDL_Renderer * renderer, parameters para, max_coordinates, int, SDL_Surface *, RGBcolour, int, int);
 void Iline(SDL_Surface *img,int ,int ,int ,int , RGBcolour col);
 
-void drawingOperation(SDL_Renderer * renderer, parameters , turtle_parameters , max_coordinates , int ,SDL_Surface * , RGBcolour, int, int );
-
-void field_change(Uint8 *, SDL_Surface *, SDL_Texture *, SDL_Renderer *, SDL_Color , char *, int, TTF_Font *);
 void colourOptions(int, int, RGBcolour *colours , int, int);
-
-
-
 
 int main (void)
 {
-	//setting the values for intial parameters of the turtle
+	/*creating and assigning variables for the UI */
+	char lcredText[4];
+	char lcgreenText[4];
+	char lcblueText[4];
+	char bgcredText[4];
+	char bgcgreenText[4];
+	char bgcblueText[4];
+	char angleText[4];
+	char numOfSegText[4];
+	char lengthText[4];
+	/*Creating varialbes for the window */
+	int winPosX = 100;
+	int winPosY = 100;
+	int winHeight = 800;
+	int winWidth = winHeight + 400;
+
+	int quit =0;
+
+	/*setting the values for intial parameters of the program, the colours of the line and the background and the maximum coordintes */
 	parameters para;
 	para.length = 10;
 	para.numOfSeg = 15;
 	para.angle = 56;
 	para.X = 0;
 	para.Y = 0;
-	
+
 	RGBcolour lineColour;
 	lineColour.r = 10;
 	lineColour.g = 255;
@@ -80,222 +88,188 @@ int main (void)
 	backColour.g = 0;
 	backColour.b = 0;
 
-	turtle_parameters turtle;
-	turtle.x = para.X;
-	turtle.y = para.Y;
-	turtle.angle = para.angle;
-	turtle.length = para.length;
-
 	max_coordinates maxC;
 	maxC.maxX = para.X;
 	maxC.minX = para.X;
 	maxC.maxY = para.Y;
 	maxC.minY = para.Y;
 
+	/*creating SDL_rect for the UI elements */
 
-	int winPosX = 100;
-	int winPosY = 100;
-	int winHeight = 800;
-	int winWidth = winHeight + 400;
-	/*
-	RGBcolour c;
-	c.r = 0;
-	c.g = 0;
-	c.b = 0;
-	*/
-	// initialising SDL
-	TTF_Init();
-	if( TTF_Init() != 0 )
-	{
-
-		perror("Error");
-		//returns -1 to show something went wrong
-		return -1;
-	}
-	if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
-	{
-
-		perror("Error");
-		//returns -1 to show something went wrong
-		return -1;
-	}
-	
-		
-	int quit =0;
-	SDL_Window *window = SDL_CreateWindow("Spirolateral",  // The first parameter is the window title //
-		winPosX, winPosY,
-		winWidth, winHeight,
-		SDL_WINDOW_SHOWN);
-
-
-	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
-
-	SDL_SetRenderDrawColor( renderer, backColour.r, backColour.g, backColour.b, 255 );
-	SDL_RenderClear(renderer);
-	
-	
-	
-	
-	SDL_Surface * UIbg = SDL_CreateRGBSurface(0, winWidth, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-	
-	SDL_Texture * renderTexture = NULL;
-	
 	SDL_Rect UI;
 	UI.x = winHeight;
 	UI.y = 0;
 	UI.w = 400;
 	UI.h = winHeight;
-	
+
 	SDL_Rect UIbox;
 	UIbox.x = winHeight;
 	UIbox.y = 0;
 	UIbox.w = 400;
 	UIbox.h = 600;
-	SDL_FillRect(UIbg, &UI, SDL_MapRGB(UIbg->format, 102, 102, 102));
-	
-	SDL_Texture * UItexture = SDL_CreateTextureFromSurface(renderer, UIbg);
-	SDL_RenderCopy(renderer, UItexture, NULL, NULL);
-	
-	SDL_Surface * UIlayout = SDL_LoadBMP("UILayout.bmp");
-	SDL_Texture * UIlayoutTex = SDL_CreateTextureFromSurface(renderer, UIlayout);
-	SDL_RenderCopy(renderer, UIlayoutTex, NULL, &UIbox);
-	
-	
-	int autoScale =1;
-	
-	//int textpos = winHeight+150;
-	char lcredText[4];
-	char lcgreenText[4];
-	char lcblueText[4];
-	
-	char bgcredText[4];
-	char bgcgreenText[4];
-	char bgcblueText[4];
-	char angleText[4];
-	char numOfSegText[4];
-	char lengthText[4];
-	SDL_Color colour = { 0, 0, 0 };
-	TTF_Font *font = TTF_OpenFont("arial.ttf", 100);
-		
-		
-	sprintf(lcredText, "%03d", lineColour.r);
-	SDL_Surface *lcredTextSurf = TTF_RenderText_Solid(font,lcredText, colour);
-	SDL_Texture *lcredTextTex = SDL_CreateTextureFromSurface(renderer,lcredTextSurf);
-	
-	sprintf(lcgreenText, "%03d", lineColour.g);
-	SDL_Surface *lcgreenTextSurf = TTF_RenderText_Solid(font,lcgreenText, colour);
-	SDL_Texture *lcgreenTextTex = SDL_CreateTextureFromSurface(renderer,lcgreenTextSurf);
-	
-	sprintf(lcblueText, "%03d", lineColour.b);
-	SDL_Surface *lcblueTextSurf = TTF_RenderText_Solid(font,lcblueText, colour);
-	SDL_Texture *lcblueTextTex = SDL_CreateTextureFromSurface(renderer,lcblueTextSurf);
-	
-	sprintf(bgcredText, "%03d", backColour.r);
-	SDL_Surface *bgcredTextSurf = TTF_RenderText_Solid(font,bgcredText, colour);
-	SDL_Texture *bgcredTextTex = SDL_CreateTextureFromSurface(renderer,bgcredTextSurf);
-	
-	sprintf(bgcgreenText, "%03d", backColour.g);
-	SDL_Surface *bgcgreenTextSurf = TTF_RenderText_Solid(font,bgcgreenText, colour);
-	SDL_Texture *bgcgreenTextTex = SDL_CreateTextureFromSurface(renderer,bgcgreenTextSurf);
-	
-	sprintf(bgcblueText, "%03d", backColour.b);
-	SDL_Surface *bgcblueTextSurf = TTF_RenderText_Solid(font,bgcblueText, colour);
-	SDL_Texture *bgcblueTextTex = SDL_CreateTextureFromSurface(renderer,bgcblueTextSurf);
-	
-	sprintf(angleText, "%03d", para.angle);
-	SDL_Surface *angleTextSurf = TTF_RenderText_Solid(font,angleText, colour);
-	SDL_Texture *angleTextTex = SDL_CreateTextureFromSurface(renderer,angleTextSurf);
-	
-	sprintf(numOfSegText, "%03d", para.numOfSeg);
-	SDL_Surface *numOfSegTextSurf = TTF_RenderText_Solid(font,numOfSegText, colour);
-	SDL_Texture *numOfSegTextTex = SDL_CreateTextureFromSurface(renderer,numOfSegTextSurf);
-	
-	sprintf(lengthText, "%03d", (int)para.length);
-	SDL_Surface *lengthTextSurf = TTF_RenderText_Solid(font,lengthText, colour);
-	SDL_Texture *lengthTextTex = SDL_CreateTextureFromSurface(renderer,lengthTextSurf);
-	
-	
-	
-	
-	
-	
+
 	SDL_Rect lcrBox;
 	lcrBox.x = winHeight+150;
 	lcrBox.y = 50;
 	lcrBox.w = 50;
 	lcrBox.h = 25;
-	
+
 	SDL_Rect lcgBox;
 	lcgBox.x = winHeight+150;
 	lcgBox.y = 75;
 	lcgBox.w = 50;
 	lcgBox.h = 25;
-	
+
 	SDL_Rect lcbBox;
 	lcbBox.x = winHeight+150;
 	lcbBox.y = 100;
 	lcbBox.w = 50;
 	lcbBox.h = 25;
-	
-	
+
 	SDL_Rect bgcrBox;
 	bgcrBox.x = winHeight+150;
 	bgcrBox.y = 150;
 	bgcrBox.w = 50;
 	bgcrBox.h = 25;
-	
+
 	SDL_Rect bgcgBox;
 	bgcgBox.x = winHeight+150;
 	bgcgBox.y = 175;
 	bgcgBox.w = 50;
 	bgcgBox.h = 25;
-	
+
 	SDL_Rect bgcbBox;
 	bgcbBox.x = winHeight+150;
 	bgcbBox.y = 200;
 	bgcbBox.w = 50;
 	bgcbBox.h = 25;
-	
+
 	SDL_Rect angleBox;
 	angleBox.x = winHeight+150;
 	angleBox.y = 250;
 	angleBox.w = 50;
 	angleBox.h = 25;
-	
+
 	SDL_Rect numOfSegBox;
 	numOfSegBox.x = winHeight+150;
 	numOfSegBox.y = 300;
 	numOfSegBox.w = 50;
 	numOfSegBox.h = 25;
-	
+
 	SDL_Rect lengthBox;
 	lengthBox.x = winHeight+300;
 	lengthBox.y = 350;
 	lengthBox.w = 50;
 	lengthBox.h = 25;
-	
-	
-	
+
+	SDL_Rect spiral;
+	spiral.x = 0;
+	spiral.y = 0;
+	spiral.w = winHeight;
+	spiral.h = winHeight;
+
+	/* initialising TTF */
+	TTF_Init();
+	if( TTF_Init() != 0 )
+	{
+
+		perror("Error");
+		/*returns -1 to show error */
+		return -1;
+	}
+	/* initialising SDL */
+	if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
+	{
+
+		perror("Error");
+		/*returns -1 to show error */
+		return -1;
+	}
+	int autoScale =1;
+
+	/*seting the colour for the text in the text fields */
+	SDL_Color colour = { 0, 0, 0 };
+	TTF_Font *font = TTF_OpenFont("arial.ttf", 100);
+
+	/*creates the window */
+	SDL_Window *window = SDL_CreateWindow("Spirolateral", winPosX, winPosY, winWidth, winHeight, SDL_WINDOW_SHOWN);
+	/*creates renderer */
+	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
+	/*creates the texture for the Spiralateral */
+	SDL_Texture * renderTexture = NULL;
+
+	/*creates a surface for the background of the UI */
+	SDL_Surface * UIbgSurf = SDL_CreateRGBSurface(0, winWidth, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+	/*fills is the backgroudn of the UI with the same colour as the UI image */
+	SDL_FillRect(UIbgSurf, &UI, SDL_MapRGB(UIbgSurf->format, 102, 102, 102));
+	/*creates a converts the surface to texture so that the UI background can be shown */
+	SDL_Texture * UItexture = SDL_CreateTextureFromSurface(renderer, UIbgSurf);
+
+	/* in the UI image */
+	SDL_Surface * UIlayoutSurf = SDL_LoadBMP("UILayout.bmp");
+	/*converts the UI image to a texture */
+	SDL_Texture * UIlayoutTex = SDL_CreateTextureFromSurface(renderer, UIlayoutSurf);
+
+
+	/*creates a surface from TTF and then converts it to texture */
+	sprintf(lcredText, "%03d", lineColour.r);
+	SDL_Surface *lcredTextSurf = TTF_RenderText_Solid(font,lcredText, colour);
+	SDL_Texture *lcredTextTex = SDL_CreateTextureFromSurface(renderer,lcredTextSurf);
+
+	sprintf(lcgreenText, "%03d", lineColour.g);
+	SDL_Surface *lcgreenTextSurf = TTF_RenderText_Solid(font,lcgreenText, colour);
+	SDL_Texture *lcgreenTextTex = SDL_CreateTextureFromSurface(renderer,lcgreenTextSurf);
+
+	sprintf(lcblueText, "%03d", lineColour.b);
+	SDL_Surface *lcblueTextSurf = TTF_RenderText_Solid(font,lcblueText, colour);
+	SDL_Texture *lcblueTextTex = SDL_CreateTextureFromSurface(renderer,lcblueTextSurf);
+
+	sprintf(bgcredText, "%03d", backColour.r);
+	SDL_Surface *bgcredTextSurf = TTF_RenderText_Solid(font,bgcredText, colour);
+	SDL_Texture *bgcredTextTex = SDL_CreateTextureFromSurface(renderer,bgcredTextSurf);
+
+	sprintf(bgcgreenText, "%03d", backColour.g);
+	SDL_Surface *bgcgreenTextSurf = TTF_RenderText_Solid(font,bgcgreenText, colour);
+	SDL_Texture *bgcgreenTextTex = SDL_CreateTextureFromSurface(renderer,bgcgreenTextSurf);
+
+	sprintf(bgcblueText, "%03d", backColour.b);
+	SDL_Surface *bgcblueTextSurf = TTF_RenderText_Solid(font,bgcblueText, colour);
+	SDL_Texture *bgcblueTextTex = SDL_CreateTextureFromSurface(renderer,bgcblueTextSurf);
+
+	sprintf(angleText, "%03d", para.angle);
+	SDL_Surface *angleTextSurf = TTF_RenderText_Solid(font,angleText, colour);
+	SDL_Texture *angleTextTex = SDL_CreateTextureFromSurface(renderer,angleTextSurf);
+
+	sprintf(numOfSegText, "%03d", para.numOfSeg);
+	SDL_Surface *numOfSegTextSurf = TTF_RenderText_Solid(font,numOfSegText, colour);
+	SDL_Texture *numOfSegTextTex = SDL_CreateTextureFromSurface(renderer,numOfSegTextSurf);
+
+	sprintf(lengthText, "%03d", (int)para.length);
+	SDL_Surface *lengthTextSurf = TTF_RenderText_Solid(font,lengthText, colour);
+	SDL_Texture *lengthTextTex = SDL_CreateTextureFromSurface(renderer,lengthTextSurf);
+
+
+	/*renders the UI textures using either boxes to position and scale the UI elements and prevent stretching */
+	SDL_RenderCopy(renderer, UItexture, NULL, NULL);
+	SDL_RenderCopy(renderer, UIlayoutTex, NULL, &UIbox);
+
 	SDL_RenderCopy(renderer, lcredTextTex, NULL, &lcrBox);
 	SDL_RenderCopy(renderer, lcgreenTextTex, NULL, &lcgBox);
 	SDL_RenderCopy(renderer, lcblueTextTex, NULL, &lcbBox);
-	
+
 	SDL_RenderCopy(renderer, bgcredTextTex, NULL, &bgcrBox);
 	SDL_RenderCopy(renderer, bgcgreenTextTex, NULL, &bgcgBox);
 	SDL_RenderCopy(renderer, bgcblueTextTex, NULL, &bgcbBox);
-	
-	
-	
+
 	SDL_RenderCopy(renderer, angleTextTex, NULL, &angleBox);
 	SDL_RenderCopy(renderer, numOfSegTextTex, NULL, &numOfSegBox);
 	SDL_RenderCopy(renderer, lengthTextTex, NULL, &lengthBox);
+	/*shows render */
 	SDL_RenderPresent(renderer);
-	//SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-	//SDL_FillRect(sshot, NULL, SDL_MapRGB(sshot->format, backColour.r, backColour.g, backColour.b));
-	
-	
+	/*creates a while to keep the window until the quit button is pressed */
 	while (quit == 0)
 	{
+		/*create a SDL Event as incomingEvent */
 		SDL_Event incomingEvent;
 		while( SDL_PollEvent( &incomingEvent ) )
 		{
@@ -309,31 +283,32 @@ int main (void)
 
 				case SDL_MOUSEBUTTONDOWN:
 				{
-					//SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+
 					SDL_RenderClear(renderer);
 					SDL_Surface *sshot = SDL_CreateRGBSurface(0, winHeight, winHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 					SDL_FillRect(sshot, NULL, SDL_MapRGB(sshot->format, backColour.r, backColour.g, backColour.b));
 					switch (incomingEvent.button.button)
 					{
+						/*checks to see if left mouse button is clicked */
 						case SDL_BUTTON_LEFT:
 						{
 							int incre_type=-1;
-
-							printf("LeftClick\n");
+							/*these variables store the X and Y values of the mouse when it is clicked */
 							int x = incomingEvent.button.x;
 							int y = incomingEvent.button.y;
-							//tests if the mouse position x is greater than 100
-							printf("X position\t%d\n", x);
+							/*captSetp is the value which decides if the programs saves the pattern or not */
 							int captSet = 0;
+							/*this is the offect along the Y for creating the button */
 							int lcOffset= 50;
 							int bgcOffset = 150;
+							/*this function tests to see which of the colour buttons are press and adjusts the colour of the line */
 							colourOptions(x, y, &lineColour, winHeight, lcOffset);
 							colourOptions(x, y, &backColour, winHeight, bgcOffset);
-							
-							
+
+							/*checks if the mosue button is inside the area of the button and if it will change the following setting */
+							/*angle */
 							if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= 250)&&(y<=275))
 							{
-								printf("YES");
 								if (para.angle> 1)
 								{
 									para.angle-=1;
@@ -348,10 +323,9 @@ int main (void)
 								}
 
 							}
-							
+							/*number of segments */
 							if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= 300)&&(y<=325))
 							{
-								printf("YES");
 								if (para.numOfSeg> 1)
 								{
 									para.numOfSeg-=1;
@@ -366,21 +340,16 @@ int main (void)
 								}
 
 							}
-							
-							
-							
+							/*length */
 							if (x>=(winHeight+275)&&(x<= winHeight+300)&&(y >= 350)&&(y<=375))
 							{
-								printf("why is this not working %d\n", (int)para.length);
-								printf("YES\n");
 								if (para.length> 1)
 								{
 									para.length -= 1;
-									printf("why is this not working %d\n", (int)para.length);
 								}
-
 							}
-							if (x>=(winHeight+275)&&(x<= winHeight+300)&&(y >= 350)&&(y<=375))
+
+							if (x>=(winHeight+350)&&(x<= winHeight+375)&&(y >= 350)&&(y<=375))
 							{
 								if (para.length< 100)
 								{
@@ -388,52 +357,39 @@ int main (void)
 								}
 
 							}
-							
-							
-							
-							
-							
-							
-							
-							
+							/*presets */
 							if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= 400)&&(y<=425))
 							{
-								printf("\nme\n");
 								para.numOfSeg = 10;
 								para.angle = 80;
 							}
 							else if (x>=(winHeight+100)&&(x<= winHeight+150)&&(y >= 400)&&(y<=425))
 							{
-								printf("\nproblem\n");
 								para.numOfSeg = 3;
 								para.angle = 170;
 							}
+
 							else if (x>=(winHeight+150)&&(x<= winHeight+200)&&(y >= 400)&&(y<=425))
 							{
-								printf("\nproblem\n");
 								para.numOfSeg = 7;
 								para.angle = 110;
 							}
 							else if (x>=(winHeight+200)&&(x<= winHeight+250)&&(y >= 400)&&(y<=425))
 							{
-								printf("\nproblem\n");
 								para.numOfSeg = 4;
 								para.angle = 90;
 							}
 							else if (x>=(winHeight+250)&&(x<= winHeight+300)&&(y >= 400)&&(y<=425))
 							{
-								printf("\nproblem\n");
 								para.numOfSeg = 3;
 								para.angle = 120;
-							}							
+							}
 							else if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= 400)&&(y<=425))
 							{
-								printf("\nproblem\n");
 								para.numOfSeg = 5;
 								para.angle = 40;
 							}
-							
-							
+							/*auto Scale */
 							if (x>=(winHeight+50)&&(x<= winHeight+150) &&(y >= 350)&&(y<=375))
 							{
 								autoScale =1;
@@ -442,126 +398,90 @@ int main (void)
 							{
 								autoScale =0;
 							}
-							
-							
+							/*creates the spiralateral and saves image sequence */
 							if (x>=(winHeight+250)&&(x<= winHeight+350) &&(y >= 500)&&(y<=550))
 							{
 								captSet = 1;
-								drawingOperation(renderer, para, turtle, maxC, winHeight, sshot,  lineColour, captSet, autoScale);
+								turtle_draw(renderer, para,  maxC, winHeight, sshot,  lineColour, captSet, autoScale);
 							}
+							/*creates the spiralateral and saves image of the completed pattern */
 							else if (x>=(winHeight+250)&&(x<= winHeight+350) &&(y >= 450)&&(y<=500))
 							{
 								captSet = 2;
-								drawingOperation(renderer, para, turtle, maxC, winHeight, sshot,  lineColour, captSet, autoScale);
+								turtle_draw(renderer, para, maxC, winHeight, sshot,  lineColour, captSet, autoScale);
 							}
+							/*creates the spiralateral */
 							else if(x>=(winHeight+50)&&(x<= winHeight+150) &&(y >= 450)&&(y<=500))
 							{
 								captSet = 0;
-								drawingOperation(renderer, para, turtle, maxC, winHeight, sshot,  lineColour, captSet, autoScale);
-								
+								turtle_draw(renderer, para, maxC, winHeight, sshot,  lineColour, captSet, autoScale);
+
 							}
-							
-								/*
-								turtle.length = para.length;
-								int openCloseResult  = open_close_pattern(para.angle, para.numOfSeg);
-								if (openCloseResult == 0)
-								{
-									printf("closed\n");
-									turtle_draw(renderer, para, turtle, maxC, winHeight, sshot, lineColour);
-								}
-								else
-								{
-									printf("open\n");
-									turtle_draw(renderer, para, turtle, maxC, winHeight, sshot, lineColour);
-								}
-								*/
-								
-								/*
-								sprintf(lcredText, "%03d", lineColour.r);
-								SDL_Surface *textSurf = TTF_RenderText_Solid(lcredText,lineCr, colour);
-								textTex = SDL_CreateTextureFromSurface(renderer,textSurf);
-								*/
-								
-								
-								
-								SDL_Rect spiral;
-								spiral.x = 0;
-								spiral.y = 0;
-								spiral.w = winHeight;
-								spiral.h = winHeight;
-								UItexture = SDL_CreateTextureFromSurface(renderer, UIbg);
-								SDL_RenderCopy(renderer, UItexture, NULL, NULL);
-								renderTexture = SDL_CreateTextureFromSurface(renderer, sshot);
-								SDL_RenderCopy(renderer, renderTexture, NULL, &spiral);
-								
-								
-								SDL_RenderCopy(renderer, UIlayoutTex, NULL, &UIbox);
-								
-								
-								//SDL_RenderCopy(renderer, textTex, NULL, &crBox);
-								//SDL_FreeSurface(textSurf);
-								sprintf(lcredText, "%03d", lineColour.r);
-								SDL_Surface *lcredTextSurf = TTF_RenderText_Solid(font,lcredText, colour);
-								SDL_Texture *lcredTextTex = SDL_CreateTextureFromSurface(renderer,lcredTextSurf);
-								
-								sprintf(lcgreenText, "%03d", lineColour.g);
-								SDL_Surface *lcgreenTextSurf = TTF_RenderText_Solid(font,lcgreenText, colour);
-								SDL_Texture *lcgreenTextTex = SDL_CreateTextureFromSurface(renderer,lcgreenTextSurf);
-								
-								sprintf(lcblueText, "%03d", lineColour.b);
-								SDL_Surface *lcblueTextSurf = TTF_RenderText_Solid(font,lcblueText, colour);
-								SDL_Texture *lcblueTextTex = SDL_CreateTextureFromSurface(renderer,lcblueTextSurf);
-								
-								sprintf(bgcredText, "%03d", backColour.r);
-								SDL_Surface *bgcredTextSurf = TTF_RenderText_Solid(font,bgcredText, colour);
-								SDL_Texture *bgcredTextTex = SDL_CreateTextureFromSurface(renderer,bgcredTextSurf);
-								
-								sprintf(bgcgreenText, "%03d", backColour.g);
-								SDL_Surface *bgcgreenTextSurf = TTF_RenderText_Solid(font,bgcgreenText, colour);
-								SDL_Texture *bgcgreenTextTex = SDL_CreateTextureFromSurface(renderer,bgcgreenTextSurf);
-								
-								sprintf(bgcblueText, "%03d", backColour.b);
-								SDL_Surface *bgcblueTextSurf = TTF_RenderText_Solid(font,bgcblueText, colour);
-								SDL_Texture *bgcblueTextTex = SDL_CreateTextureFromSurface(renderer,bgcblueTextSurf);
-								
-								sprintf(angleText, "%03d", para.angle);
-								SDL_Surface *angleTextSurf = TTF_RenderText_Solid(font,angleText, colour);
-								SDL_Texture *angleTextTex = SDL_CreateTextureFromSurface(renderer,angleTextSurf);
-								
-								sprintf(numOfSegText, "%03d", para.numOfSeg);
-								SDL_Surface *numOfSegTextSurf = TTF_RenderText_Solid(font,numOfSegText, colour);
-								SDL_Texture *numOfSegTextTex = SDL_CreateTextureFromSurface(renderer,numOfSegTextSurf);
-								
-								sprintf(lengthText, "%03d", (int)para.length);
-								SDL_Surface *lengthTextSurf = TTF_RenderText_Solid(font,lengthText, colour);
-								SDL_Texture *lengthTextTex = SDL_CreateTextureFromSurface(renderer,lengthTextSurf);
-								printf("length %f\n", para.length);
-								
-								
-								SDL_RenderCopy(renderer, bgcredTextTex, NULL, &bgcrBox);
-								SDL_RenderCopy(renderer, bgcgreenTextTex, NULL, &bgcgBox);
-								SDL_RenderCopy(renderer, bgcblueTextTex, NULL, &bgcbBox);
-								
-								SDL_RenderCopy(renderer, lcredTextTex, NULL, &lcrBox);
-								SDL_RenderCopy(renderer, lcgreenTextTex, NULL, &lcgBox);
-								SDL_RenderCopy(renderer, lcblueTextTex, NULL, &lcbBox);
-								SDL_RenderCopy(renderer, angleTextTex, NULL, &angleBox);
-								SDL_RenderCopy(renderer, numOfSegTextTex, NULL, &numOfSegBox);
-								SDL_RenderCopy(renderer, lengthTextTex, NULL, &lengthBox);
-								
-								
-								SDL_RenderPresent(renderer);
-								//SDL_FreeSurface(textSurf);
-								SDL_RenderClear(renderer);
-
-							
-							//SDL_Surface *surfaceEncode = SDL_ConvertrSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
-
-							break;
 						}
+
 						default:
 						{
-						printf("press left click\n");
+							/*converts the surface for the text to a texture */
+							renderTexture = SDL_CreateTextureFromSurface(renderer, sshot);
+
+							sprintf(lcredText, "%03d", lineColour.r);
+							SDL_Surface *lcredTextSurf = TTF_RenderText_Solid(font,lcredText, colour);
+							SDL_Texture *lcredTextTex = SDL_CreateTextureFromSurface(renderer,lcredTextSurf);
+
+							sprintf(lcgreenText, "%03d", lineColour.g);
+							SDL_Surface *lcgreenTextSurf = TTF_RenderText_Solid(font,lcgreenText, colour);
+							SDL_Texture *lcgreenTextTex = SDL_CreateTextureFromSurface(renderer,lcgreenTextSurf);
+
+							sprintf(lcblueText, "%03d", lineColour.b);
+							SDL_Surface *lcblueTextSurf = TTF_RenderText_Solid(font,lcblueText, colour);
+							SDL_Texture *lcblueTextTex = SDL_CreateTextureFromSurface(renderer,lcblueTextSurf);
+
+							sprintf(bgcredText, "%03d", backColour.r);
+							SDL_Surface *bgcredTextSurf = TTF_RenderText_Solid(font,bgcredText, colour);
+							SDL_Texture *bgcredTextTex = SDL_CreateTextureFromSurface(renderer,bgcredTextSurf);
+
+							sprintf(bgcgreenText, "%03d", backColour.g);
+							SDL_Surface *bgcgreenTextSurf = TTF_RenderText_Solid(font,bgcgreenText, colour);
+							SDL_Texture *bgcgreenTextTex = SDL_CreateTextureFromSurface(renderer,bgcgreenTextSurf);
+
+							sprintf(bgcblueText, "%03d", backColour.b);
+							SDL_Surface *bgcblueTextSurf = TTF_RenderText_Solid(font,bgcblueText, colour);
+							SDL_Texture *bgcblueTextTex = SDL_CreateTextureFromSurface(renderer,bgcblueTextSurf);
+
+							sprintf(angleText, "%03d", para.angle);
+							SDL_Surface *angleTextSurf = TTF_RenderText_Solid(font,angleText, colour);
+							SDL_Texture *angleTextTex = SDL_CreateTextureFromSurface(renderer,angleTextSurf);
+
+							sprintf(numOfSegText, "%03d", para.numOfSeg);
+							SDL_Surface *numOfSegTextSurf = TTF_RenderText_Solid(font,numOfSegText, colour);
+							SDL_Texture *numOfSegTextTex = SDL_CreateTextureFromSurface(renderer,numOfSegTextSurf);
+
+							sprintf(lengthText, "%03d", (int)para.length);
+							SDL_Surface *lengthTextSurf = TTF_RenderText_Solid(font,lengthText, colour);
+							SDL_Texture *lengthTextTex = SDL_CreateTextureFromSurface(renderer,lengthTextSurf);
+
+
+							/*renders the text and the spiralateral */
+							SDL_RenderCopy(renderer, UItexture, NULL, NULL);
+							SDL_RenderCopy(renderer, UIlayoutTex, NULL, &UIbox);
+
+							SDL_RenderCopy(renderer, lcredTextTex, NULL, &lcrBox);
+							SDL_RenderCopy(renderer, lcgreenTextTex, NULL, &lcgBox);
+							SDL_RenderCopy(renderer, lcblueTextTex, NULL, &lcbBox);
+
+							SDL_RenderCopy(renderer, bgcredTextTex, NULL, &bgcrBox);
+							SDL_RenderCopy(renderer, bgcgreenTextTex, NULL, &bgcgBox);
+							SDL_RenderCopy(renderer, bgcblueTextTex, NULL, &bgcbBox);
+
+							SDL_RenderCopy(renderer, angleTextTex, NULL, &angleBox);
+							SDL_RenderCopy(renderer, numOfSegTextTex, NULL, &numOfSegBox);
+							SDL_RenderCopy(renderer, lengthTextTex, NULL, &lengthBox);
+
+							SDL_RenderCopy(renderer, renderTexture, NULL, &spiral);
+
+							SDL_RenderPresent(renderer);
+
+							SDL_RenderClear(renderer);
 						}
 					}
 					break;
@@ -569,66 +489,93 @@ int main (void)
 			}
 		}
 	}
-	
+
+	/*destroys the textures when the closed button is clicked */
+	SDL_DestroyTexture(UItexture);
 	SDL_DestroyTexture(UIlayoutTex);
-	SDL_FreeSurface(UIlayout);
+
+	SDL_DestroyTexture(lcredTextTex);
+	SDL_DestroyTexture(lcgreenTextTex);
+	SDL_DestroyTexture(lcblueTextTex);
+
+	SDL_DestroyTexture(bgcredTextTex);
+	SDL_DestroyTexture(bgcgreenTextTex);
+	SDL_DestroyTexture(bgcblueTextTex);
+
+	SDL_DestroyTexture(angleTextTex);
+	SDL_DestroyTexture(numOfSegTextTex);
+	SDL_DestroyTexture(lengthTextTex);
+
+	/*frees the surfaces when the closed button is clicked */
+	SDL_FreeSurface(UIbgSurf);
+	SDL_FreeSurface(UIlayoutSurf);
+
+	SDL_FreeSurface(lcredTextSurf);
+	SDL_FreeSurface(lcgreenTextSurf);
+	SDL_FreeSurface(lcblueTextSurf);
+
+	SDL_FreeSurface(bgcredTextSurf);
+	SDL_FreeSurface(bgcgreenTextSurf);
+	SDL_FreeSurface(bgcblueTextSurf);
+
+	SDL_FreeSurface(angleTextSurf);
+	SDL_FreeSurface(numOfSegTextSurf);
+	SDL_FreeSurface(lengthTextSurf);
+
+	/*deletes renderer */
 	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow( window );
+	/*deletes window */
+	SDL_DestroyWindow(window);
+	/*Quits the program */
 	SDL_Quit();
 	return 0;
 }
 
 void colourOptions(int x, int y, RGBcolour *colour, int winHeight, int offset)
+/* this functions checks if the button is clicked bying checkig the position of the mouse when clicked
+ this prosition. if so it will adjust the variables */
 {
 	if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= offset)&&(y<=offset+25))
 	{
-		if (colour->r> 0)
+		if (colour->r> 9)
 		{
-			colour->r -=1;
+			colour->r -=10;
 		}
-
 	}
-	
 	if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= offset)&&(y<=offset+25))
 	{
-		if (colour->r< 255)
+		if (colour->r< 246)
 		{
-			colour->r +=1;
+			colour->r +=10;
 		}
 	}
-	
-	
 	if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= offset+25)&&(y<=offset+50))
 	{
-		if (colour->g> 0)
+		if (colour->g> 9)
 		{
-			colour->g -=1;
+			colour->g -=10;
 		}
 
 	}
-	
 	if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= offset+25)&&(y<=offset+50))
 	{
-		if (colour->g< 255)
+		if (colour->g< 246)
 		{
-			colour->g +=1;
+			colour->g +=10;
 		}
 	}
-	
 	if (x>=(winHeight+50)&&(x<= winHeight+100)&&(y >= offset+50)&&(y<=offset+75))
 	{
-		if (colour->b> 0)
+		if (colour->b> 9)
 		{
-			colour->b -=1;
+			colour->b -=10;
 		}
-
 	}
-	
 	if (x>=(winHeight+300)&&(x<= winHeight+350)&&(y >= offset+50)&&(y<=offset+75))
 	{
-		if (colour->b< 255)
+		if (colour->b< 246)
 		{
-			colour->b +=1;
+			colour->b +=10;
 		}
 	}
 }
@@ -636,187 +583,115 @@ void colourOptions(int x, int y, RGBcolour *colour, int winHeight, int offset)
 
 
 
-void field_change(Uint8 * field, SDL_Surface * textSurf, SDL_Texture *textTex, SDL_Renderer * renderer, SDL_Color colour, char * lineCr, int incre_type, TTF_Font *font)
+void turtle_draw(SDL_Renderer * renderer, parameters para, max_coordinates maxC, int winHeight, SDL_Surface * sshot, RGBcolour lineColour, int captSet, int autoScale)
 {
-	if (incre_type == -1)
-	{
-		field -=1;
-	}
-	else
-	{
-		field +=1;
-	}
-	
-	sprintf(lineCr, "%03d", *field);
-	textSurf = TTF_RenderText_Solid(font, lineCr, colour);
-	textTex = SDL_CreateTextureFromSurface(renderer,textSurf);
-}
-
-
-
-
-
-
-void drawingOperation(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight,SDL_Surface * sshot, RGBcolour lineColour, int captSet, int autoScale)
-{
+	/* this fuction has two fuctions. first itcalucaltes the maximum and mininum point of the pattern
+	 then positions the pattern so that it is on screen. it also scales the pattern so that all of it
+	 stays on the surface. this can be disabled by the user so that they can chose their own value
+	 next the draws the spiralateral out using the new positionn and scale. */
 	para.angle = 180-para.angle;
+	/* sets teh turtle parameters to the users chosen values. */
+	turtle_parameters turtle;
+	turtle.x = para.X;
+	turtle.y = para.Y;
 	turtle.angle = para.angle;
 	turtle.length = para.length;
-	int openCloseResult  = open_close_pattern(para.angle, para.numOfSeg);
-	if (openCloseResult == 0)
-	{
-		printf("closed\n");
-		turtle_draw(renderer, para, turtle, maxC, winHeight, sshot, lineColour, captSet, autoScale);
-	}
-	else
-	{
-		printf("open\n");
-		turtle_draw(renderer, para, turtle, maxC, winHeight, sshot, lineColour, captSet, autoScale);
-	}
-}
-
-void turtle_draw(SDL_Renderer * renderer, parameters para, turtle_parameters turtle, max_coordinates maxC, int winHeight, SDL_Surface * sshot, RGBcolour lineColour, int captSet, int autoScale)
-{
-	printf("length %d\n", para.angle);
-	
+	/* creates the string which the file will be saved under as */
+	char filepath[30];
+	int find =0;
+	int draw =1;
+	/* calculates the total number of cycles in the spirolateral */
 	int numOfCycles = max_cycles(para.angle, para.numOfSeg);
 
+	/* this section calcualtes the max and min coordinates and saves them to the maxC struct */
 	for (int k = 1; k<= numOfCycles; k++)
 	{
 		turtle.length= para.length;
 		for (int d=1; d <=para.numOfSeg; d++)
 		{
-			find_max_coordinates(renderer, &turtle, &maxC, para.angle, para.length);
+			/* this find the max and min coordinates */
+			turtle_move(renderer, &turtle, &maxC, para.angle, para.length, sshot, lineColour, find);
 		}
 	}
-	printf ("scale me%d", autoScale);
+	/* resets the angle */
 	turtle.angle = para.angle;
-	
+	/* moves teh spirolateral and then scales it if the not disabled by the user */
 	transform_scale(maxC, &turtle, &para.length, winHeight, autoScale);
-
+	/* this fucntion draws the spiralaterial by using the new starting pos and the new length */
 	for (int i = 1; i<=numOfCycles; i++)
 	{
 		turtle.length= para.length;
 		for (int j = 1; j<= para.numOfSeg; j++)
 		{
-			turtle_move(renderer, &turtle, para.angle, para.length, sshot, lineColour);
+			/* this draws the line for the spiralaterals */
+			turtle_move(renderer, &turtle, &maxC, para.angle, para.length, sshot, lineColour, draw);
 		}
-			
+			/* if the save image sequence of the spiralateral button was pressed */
 			if (captSet == 1)
 			{
-			char filepath[30];
 			sprintf(filepath, "screen%03d.bmp", i);
-			printf("\n%s\n", filepath);
 			SDL_SaveBMP(sshot, filepath);
 			}
-			//---------------------------------------------------------------------------------------
 
 	}
+	/* if the save an image of the final pattern if save image button was pressed */
 	if (captSet == 2)
 	{
-	char filepath[30];
-	sprintf(filepath, "screen.bmp");
-	printf("\n%s\n", filepath);
-	SDL_SaveBMP(sshot, filepath);
+		sprintf(filepath, "screen.bmp");
+		SDL_SaveBMP(sshot, filepath);
 	}
 }
 
-
 int max_cycles(float angle, float numOfSeg)
+/* finds the maximum number of the cycles for the chosen number of Segments ad angle */
 {
-	printf("angle %f\n", numOfSeg);
-	printf("angle %f\n", angle);
 	float outcome = 1;
 	float i=0;
 	while (outcome !=0)
+	/* iterates throught the outcome until it reach outcome is whole */
 	{
 		i++;
 		outcome = ((angle*numOfSeg)/(360/i));
 		outcome = fmod(outcome, 1);
 	}
+
 	if (angle == 80 && ((int)numOfSeg % 2 ==1))
 	{
 		i *=2;
 	}
-
+	/* returns the number of the cycles */
 	return i;
-
 }
 
-
-/*
-void pen_down(SDL_Renderer *renderer, int x0, int y0, int length, RGBcolour c)
+void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates * maxC, int angle, int length, SDL_Surface * sshot, RGBcolour lineColour, int draw)
 {
-	SDL_SetRenderDrawColor(renderer,c.r,c.g,c.b,255);
-	for(int i=0; i<=length; i++)
-	{
-
-		SDL_RenderDrawPoint(renderer, i, 10 );
-	}
-
-}
-*/
-
-
-int open_close_pattern(int angle, int numOfSeg)
-{
-	printf ("%d\n", angle);
-	if ((numOfSeg*angle)%180 ==0)
-	{
-		if (numOfSeg%2 ==0)
-		{
-			if ((numOfSeg <=2) || ((angle*numOfSeg)%360 == 0))
-			{
-				return 1;		/* open*/
-			}
-			else
-			{
-				return 0;		/* closed*/
-			}
-		}
-		else
-		{
-			if ((numOfSeg*angle)%360 == 0)
-			{
-				return 0;		/* open*/
-			}
-			else
-			{
-				return 1;		/* closed*/
-			}
-		}
-	}
-	else
-	{
-		return 0;				/* open*/
-	}
-}
-
-void turtle_move(SDL_Renderer * renderer, turtle_parameters * turtle, int angle, int length, SDL_Surface * sshot, RGBcolour lineColour)
-{
-	float Xdif, Ydif;
+	/* this fuction either calculates the max and min coordinates or draws the spiralateral */
+	//float Xdif, Ydif;
 	float rad = PI/180;
 	float X0, Y0;
-
-
+	/*sets the orignal position */
 	X0 = turtle->x;
 	Y0 = turtle->y;
-	//SDL_SetRenderDrawColor( renderer, 0, 0, 0, 0xFF );
-
-	Xdif = turtle->length*(cos(rad*(turtle->angle)));
-	turtle->x += Xdif;
-	Ydif = turtle->length*(sin(rad*(turtle->angle)));
-	turtle->y += Ydif;
-	//SDL_RenderDrawLine(renderer, (int)X0, (int)Y0, (int)turtle->x, (int)turtle->y);
-	Iline(sshot, X0, Y0, turtle->x, turtle->y, lineColour);
-
-	if (turtle->angle >= 360)
+	turtle->x += turtle->length*(cos(rad*(turtle->angle)));
+	//turtle->x += Xdif;
+	turtle->y += turtle->length*(sin(rad*(turtle->angle)));
+	//turtle->y += Ydif;
+	/* if draw is one then it will draw the spirolateral */
+	if (draw ==1)
 	{
-		turtle->angle -=360;
+		Iline(sshot, X0, Y0, turtle->x, turtle->y, lineColour);
 	}
+	/* if draw  is 0 then it will find the max coordinates */
+	else if (draw ==0)
+	{
+		max_coordinate_test(&turtle->x, &turtle->y, maxC);
+	}
+	/* keeps the agle with in the range of 0-360 */
+	(turtle->angle)%=360;
 	turtle->angle += angle;
 	turtle->length += length;
 }
+
 //-------------------------------------------------------------------------------------------------------------------------------
 //Eikes code
 void Iline(SDL_Surface *img,int x0,int y0,int xn,int yn,RGBcolour col)
@@ -839,10 +714,8 @@ void Iline(SDL_Surface *img,int x0,int y0,int xn,int yn,RGBcolour col)
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
 void max_coordinate_test(float *pXn, float *pYn, struct max_coordinates * maxC)
+/* this function saves the max ad min points for the x and y coordinates ii the max_coordinate struct*/
 {
 	if (*pXn>maxC->maxX)
 	{
@@ -862,90 +735,54 @@ void max_coordinate_test(float *pXn, float *pYn, struct max_coordinates * maxC)
 	}
 }
 
-
-void find_max_coordinates(SDL_Renderer * renderer, turtle_parameters * turtle, max_coordinates * maxC, int angle, int length)
-{
-	float Xdif, Ydif;
-	float rad = PI/180;
-	float X0, Y0;
-
-
-	X0 = turtle->x;
-	Y0 = turtle->y;
-	//SDL_SetRenderDrawColor( renderer, 0, 0, 0, 0xFF );
-
-	Xdif = turtle->length*(cos(rad*(turtle->angle)));
-	turtle->x += Xdif;
-	Ydif = turtle->length*(sin(rad*(turtle->angle)));
-	turtle->y += Ydif;
-	
-	max_coordinate_test(&turtle->x, &turtle->y, maxC);
-	printf("\n%f\t%f\t%f\t%f\n", maxC->minX, maxC->minY, maxC->maxX, maxC->maxY);
-	if (turtle->angle >= 360)
-	{
-		turtle->angle -=360;
-	}
-	turtle->angle += angle;
-	turtle->length += length;
-}
-
 void transform_scale(struct max_coordinates maxC, struct turtle_parameters * turtle, float * length, int maxResolution, int autoScale)
 {
-	printf("scmaxale %f\n", maxC.maxX);
+	/* this function scales and positions the spiralateral to makes sure that it is not goig
+	 off the surface when the auto scale option is ticked */
+
+	/* finds the distnace which is needed to move the min coordinates to the to y=0 and x=0 */
 	int moveDifX = (0+2) - (int)maxC.minX;
 	int moveDifY = (0+2) - (int)maxC.minY;
-	printf("tranform %d\t%d\n", moveDifX, moveDifY);
-	//printf("tranform %d\n", moveDifY);
+	/* creates the transformation matrix */
 	float matrixT[3][3] = {{1, 0, moveDifX}, {0, 1, moveDifY}, {0,0,1}};
+	/* seets up the other [art of the traformation matrix by putting the max x and y and min x and y */
 	float minXYvalue[3] = {maxC.minX, maxC.minY, 1};
 	float maxXYvalue[3] = {maxC.maxX, maxC.maxY, 1};
 
 
-	float minTransformX=0, minTransformY=0, maxTransformX=0, maxTransformY = 0;
+	float maxTransformX=0, maxTransformY = 0;
 	float scale = 1;
-	printf("tranform %f\n", maxC.maxY);
-	printf("tranform %f\n", maxC.maxX);
-	for( int i =0; i<3; i++)
-	{
-		minTransformX += (matrixT[0][i])*(minXYvalue[i]);
-		minTransformY += (matrixT[1][i])*(minXYvalue[i]);
-	}
+	/* transforms the points */
+
 	for( int j =0; j<3; j++)
 	{
 		maxTransformX += (matrixT[0][j])*(maxXYvalue[j]);
 		maxTransformY += (matrixT[1][j])*(maxXYvalue[j]);
 	}
-	
-	maxC.minX = minTransformX;
-	maxC.minY = minTransformY;
+	/* assigns the final tranformation to the min and max coordinates  */
+
 	maxC.maxX = maxTransformX;
 	maxC.maxY = maxTransformY;
-	printf("X tranform %f\n", maxC.minY);
-	printf("Y tranform %f\n", maxC.minX);
-	printf("\nafter me    %f\t%f\t%f\t%f\n", maxC.minX, maxC.minY, maxC.maxX, maxC.maxY);
 
-	printf("scmaxale %f\n", maxC.maxX);
 	if (autoScale == 1)
 	{
+		/* gets the scale factor wither relation to the max X adn the resolutioin alone the X */
 		scale *= (maxResolution-10)/maxC.maxX;
+		/* scales the max X so that its the same as the X resolution */
 		maxC.maxX *=scale;
 		maxC.maxY *=scale;
-			printf("scale %f\n", scale);
-
+		/* if the max Y is greater than the resolution then it is reduces the scale  */
 		if (maxC.maxY > maxResolution)
 		{
 			scale *= (maxResolution-10)/maxC.maxY;
 		}
-	
-
-		printf("scale %f\n", scale);
+		/* applies the scale factor to the distance moved along the X and Y and the lenght of a segment */
 
 		moveDifX *= scale;
-
 		moveDifY *= scale;
 		(*length)*= scale;
 	}
+	/* applies the transformation to the intial turtle position */
 	turtle->x = moveDifX;
 	turtle->y = moveDifY;
-	printf("move X %f, move Y %f\n", turtle->x, turtle->y);
 }
